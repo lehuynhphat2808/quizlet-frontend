@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:quizlet_frontend/pages/UserInfoPage.dart';
+import 'package:quizlet_frontend/user/UserInfoPage.dart';
 
 class UserSettingPage extends StatelessWidget {
   const UserSettingPage({Key? key}) : super(key: key);

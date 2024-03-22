@@ -1,9 +1,13 @@
+import 'dart:async';
+
 import 'package:animated_notch_bottom_bar/animated_notch_bottom_bar/animated_notch_bottom_bar.dart';
 import 'package:flutter/material.dart';
-import 'package:quizlet_frontend/pages/FolderPage.dart';
-import 'package:quizlet_frontend/pages/HomePage.dart';
-import 'package:quizlet_frontend/pages/TopicPage.dart';
-import 'package:quizlet_frontend/pages/UserSettingPage.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:quizlet_frontend/folder/FolderPage.dart';
+import 'package:quizlet_frontend/home/HomePage.dart';
+import 'package:quizlet_frontend/user/UserSettingPage.dart';
+
+import '../Topic/TopicPage.dart';
 // import 'package:flutter_svg/flutter_svg.dart';
 
 class MainPage extends StatefulWidget {
@@ -20,7 +24,7 @@ class _MainPageState extends State<MainPage> {
   /// Controller to handle bottom nav bar and also handles initial page
   final _controller = NotchBottomBarController(index: 0);
 
-  int maxCount = 5;
+  int maxCount = 4;
 
   @override
   void dispose() {
@@ -28,28 +32,20 @@ class _MainPageState extends State<MainPage> {
     super.dispose();
   }
 
-  int indexPage = 0;
+  int _indexPage = 0;
 
   /// widget list
   final List<Widget> bottomBarPages = [
     const HomePage(),
     const TopicPage(),
-    Container(),
     const FolderPage(),
     const UserSettingPage(),
   ];
-  final List<String> topicString = [
-    'Home',
-    'Topic',
-    '',
-    'Folder',
-    'User Setting'
-  ];
+  final List<String> topicString = ['Home', 'Topic', 'Folder', 'User Setting'];
 
   final List<IconData?> actionList = [
     null,
     Icons.add,
-    null,
     Icons.add,
     null,
   ];
@@ -59,7 +55,7 @@ class _MainPageState extends State<MainPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          topicString[indexPage],
+          topicString[_indexPage],
           style: const TextStyle(
               fontWeight: FontWeight.bold, fontFamily: 'Pacifico'),
         ),
@@ -69,11 +65,16 @@ class _MainPageState extends State<MainPage> {
         actions: [
           Padding(
             padding: const EdgeInsets.only(right: 8.0),
-            child: actionList[indexPage] != null
-                ? Icon(actionList[indexPage])
+            child: actionList[_indexPage] != null
+                ? Icon(actionList[_indexPage])
                 : null,
           )
         ],
+      ),
+      floatingActionButton: FloatingActionButton(
+        backgroundColor: Colors.green,
+        onPressed: () {},
+        child: Icon(Icons.add),
       ),
       body: PageView(
         controller: _pageController,
@@ -140,17 +141,6 @@ class _MainPageState extends State<MainPage> {
                 // ),
                 BottomBarItem(
                   inActiveItem: Icon(
-                    Icons.add_circle_outline,
-                    color: Colors.blueGrey,
-                  ),
-                  activeItem: Icon(
-                    Icons.add,
-                    color: Colors.greenAccent,
-                  ),
-                  itemLabel: 'Add button',
-                ),
-                BottomBarItem(
-                  inActiveItem: Icon(
                     Icons.folder_outlined,
                     color: Colors.blueGrey,
                   ),
@@ -177,12 +167,41 @@ class _MainPageState extends State<MainPage> {
                 // log('current selected index $index');
                 _pageController.jumpToPage(index);
                 setState(() {
-                  indexPage = index;
+                  _indexPage = index;
                 });
               },
               kIconSize: 24.0,
             )
           : null,
     );
+  }
+
+  void showBottomPopup() {
+    showModalBottomSheet<void>(
+      context: context,
+      builder: (BuildContext context) {
+        return Container(
+          height: 200,
+          color: Colors.amber,
+          child: Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                const Text('Modal BottomSheet'),
+                ElevatedButton(
+                  child: const Text('Close BottomSheet'),
+                  onPressed: () => Navigator.pop(context),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  bool isHaveAddButton(int index) {
+    return (index > 0 && index < 3);
   }
 }
