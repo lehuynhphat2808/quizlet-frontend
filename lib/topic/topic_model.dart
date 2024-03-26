@@ -1,13 +1,17 @@
 class TopicModel {
-  String id;
+  String? id;
   String name;
+  int? wordCount;
   bool public;
+  String url;
 
   static List<TopicModel> topicModelList = [];
 
   TopicModel({
-    required this.id,
+    this.id,
     required this.name,
+    this.wordCount,
+    this.url = 'string',
     required this.public,
   });
 
@@ -21,12 +25,16 @@ class TopicModel {
   factory TopicModel.fromJson(Map<String, dynamic> json) => TopicModel(
         id: json["id"],
         name: json["name"],
+        wordCount: json["wordCount"],
+        url: json["url"] ?? 'String',
         public: json["public"],
       );
 
   Map<String, dynamic> toJson() => {
         "id": id,
         "name": name,
+        "url": url,
+        "wordCount": wordCount,
         "public": public,
       };
 }

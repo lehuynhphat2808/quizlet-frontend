@@ -1,8 +1,8 @@
-import 'package:quizlet_frontend/topic/TopicModel.dart';
+import 'package:quizlet_frontend/topic/topic_model.dart';
 
 abstract class TopicListEvent {}
 
-class TopicListLoading extends TopicListEvent {
+class TopicListLoadingEvent extends TopicListEvent {
   @override
   String toString() {
     // TODO: implement toString
@@ -10,10 +10,10 @@ class TopicListLoading extends TopicListEvent {
   }
 }
 
-class TopicListInserted extends TopicListEvent {
+class TopicInsertedEvent extends TopicListEvent {
   final TopicModel topicInfo;
 
-  TopicListInserted({required this.topicInfo});
+  TopicInsertedEvent({required this.topicInfo});
 
   @override
   String toString() {
@@ -21,10 +21,10 @@ class TopicListInserted extends TopicListEvent {
   }
 }
 
-class TopicListRemoved extends TopicListEvent {
+class TopicListRemovedEvent extends TopicListEvent {
   final int id;
 
-  TopicListRemoved({required this.id});
+  TopicListRemovedEvent({required this.id});
 
   @override
   String toString() {
@@ -32,10 +32,10 @@ class TopicListRemoved extends TopicListEvent {
   }
 }
 
-class TopicListEdited extends TopicListEvent {
+class TopicListEditedEvent extends TopicListEvent {
   final TopicModel topicInfo;
 
-  TopicListEdited({required this.topicInfo});
+  TopicListEditedEvent({required this.topicInfo});
 
   @override
   String toString() {
@@ -43,27 +43,30 @@ class TopicListEdited extends TopicListEvent {
   }
 }
 
-class TopicListLoaded extends TopicListEvent {
-  final List<TopicModel> topics;
-
-  TopicListLoaded({required this.topics});
-
+class TopicListLoadedEvent extends TopicListEvent {
   @override
   String toString() {
-    return "Event TopicListLoaded: ${topics.map((e) => e.toString())}";
+    return "Event TopicListLoaded:";
   }
 }
 
-class TopicListNotifyError extends TopicListEvent {
+class TopicListNotifyErrorEvent extends TopicListEvent {
   @override
   String toString() {
     return "Event TopicListNotifyError";
   }
 }
 
-class TopicListErrorConfirmed extends TopicListEvent {
+class TopicListErrorConfirmedEvent extends TopicListEvent {
   @override
   String toString() {
     return "Event TopicListErrorConfirmed";
+  }
+}
+
+class TodoListNotifyErrorEvent extends TopicListEvent {
+  @override
+  String toString() {
+    return "Event TodoListNotifyError";
   }
 }

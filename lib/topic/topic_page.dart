@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:provider/provider.dart';
-import 'package:quizlet_frontend/Topic/TopicModel.dart';
-import 'package:quizlet_frontend/Topic/TopicProvider.dart';
 import 'package:quizlet_frontend/topic/bloc/topic_bloc.dart';
 import 'package:quizlet_frontend/topic/bloc/topic_event.dart';
 import 'package:quizlet_frontend/topic/bloc/topic_state.dart';
+import 'package:quizlet_frontend/topic/topic_model.dart';
 
 class TopicPage extends StatefulWidget {
   const TopicPage({Key? key}) : super(key: key);
@@ -17,7 +15,7 @@ class TopicPage extends StatefulWidget {
 class _TopicPageState extends State<TopicPage> {
   @override
   void initState() {
-    context.read<TopicListBloc>().add(TopicListLoading());
+    context.read<TopicListBloc>().add(TopicListLoadingEvent());
     // print(topics);
     super.initState();
   }
@@ -30,13 +28,17 @@ class _TopicPageState extends State<TopicPage> {
   Widget get _buildListTopic {
     return BlocBuilder<TopicListBloc, TopicListState>(
       builder: (BuildContext builderContext, TopicListState state) {
-        if (state.isLoading || state.topics.isEmpty) {
-          return _buildEmptyTodoBackground();
+        if (state is TopicListLoadingState) {
+          return const CircularProgressIndicator();
+        } else if (state is TopicListLoadedState) {
+          return ListView.builder(
+            itemBuilder: (context, index) {
+              return _buildTopicItem(state.topics[index]);
+            },
+            itemCount: state.topics.length,
+          );
         }
-        return ListView.builder(
-          itemBuilder: _buildTopicItem,
-          itemCount: state.topics.length,
-        );
+        return _buildEmptyTodoBackground();
       },
     );
   }
@@ -47,7 +49,7 @@ class _TopicPageState extends State<TopicPage> {
         child: Image.asset('assets/images/img_empty_todo_list.jpg'));
   }
 
-  Widget _buildTopicItem(BuildContext context, int index) {
+  Widget _buildTopicItem(TopicModel topicModel) {
     return Card(
       child: Row(
         children: [
@@ -57,13 +59,10 @@ class _TopicPageState extends State<TopicPage> {
               children: [
                 ListTile(
                   title: Text(
-                    BlocProvider.of<TopicListBloc>(context)
-                        .state
-                        .topics[index]
-                        .name,
+                    topicModel.name,
                     style: const TextStyle(fontWeight: FontWeight.bold),
                   ),
-                  subtitle: const Text('228 thuat ngu'),
+                  subtitle: Text('${topicModel.wordCount} words'),
                 ),
                 const Padding(
                   padding: EdgeInsets.only(left: 15, bottom: 10),

@@ -1,28 +1,25 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:provider/provider.dart';
-import 'package:quizlet_frontend/home/HomePage.dart';
-import 'package:quizlet_frontend/main/MainPage.dart';
-import 'package:quizlet_frontend/login/LoginPage.dart';
+import 'package:quizlet_frontend/main/main_page.dart';
 import 'package:quizlet_frontend/topic/bloc/topic_bloc.dart';
-import 'package:quizlet_frontend/utilities/testApiCall.dart';
-import 'package:quizlet_frontend/Topic/TopicProvider.dart';
+import 'package:quizlet_frontend/utilities/router_manager.dart';
+import 'package:quizlet_frontend/word/bloc/word_bloc.dart';
 
 void main() {
-  runApp(MultiProvider(
+  runApp(MultiBlocProvider(
     providers: [
-      ChangeNotifierProvider(create: (_) => TopicProvider()),
-    ],
-    child: MultiBlocProvider(
-      providers: [
-        BlocProvider<TopicListBloc>(
-          create: (context) => TopicListBloc(),
-        ),
-      ],
-      child: const MaterialApp(
-        debugShowCheckedModeBanner: false,
-        home: MainPage(),
+      BlocProvider<TopicListBloc>(
+        create: (context) => TopicListBloc(),
       ),
+      BlocProvider<WordCubit>(
+        create: (context) => WordCubit(),
+      )
+    ],
+    child: const MaterialApp(
+      initialRoute: Routes.mainPage,
+      onGenerateRoute: RouteGenerator.getRoute,
+      debugShowCheckedModeBanner: false,
+      home: MainPage(),
     ),
   ));
 }

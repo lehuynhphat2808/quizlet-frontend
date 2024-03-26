@@ -1,23 +1,26 @@
-import 'package:quizlet_frontend/topic/TopicModel.dart';
+import 'package:quizlet_frontend/topic/topic_model.dart';
 
-class TopicListState {
+abstract class TopicListState {}
+
+class TopicListInitialState extends TopicListState {}
+
+class TopicListLoadingState extends TopicListState {}
+
+class TopicInsertedState extends TopicListState {
+  final TopicModel topicModel;
+
+  TopicInsertedState(this.topicModel);
+}
+
+class TopicListLoadedState extends TopicListState {
   final List<TopicModel> topics;
-  final bool isLoading;
-  final bool isError;
 
-  const TopicListState(
-      {this.topics = const [], this.isLoading = false, this.isError = false});
-
-  TopicListState copyWith(
-      {List<TopicModel>? topics, bool? isLoading, bool? isError}) {
-    return TopicListState(
-        topics: topics ?? this.topics,
-        isLoading: isLoading ?? this.isLoading,
-        isError: isError ?? this.isError);
-  }
+  TopicListLoadedState({this.topics = const []});
 
   @override
   String toString() {
-    return "TopicListState(topics: ${topics.map((e) => e.toString())}, isLoading: $isLoading, isError: $isError)";
+    return "TopicListLoadedState(topics: ${topics.map((e) => e.toString())},)";
   }
 }
+
+class TopicListErrorState extends TopicListState {}
