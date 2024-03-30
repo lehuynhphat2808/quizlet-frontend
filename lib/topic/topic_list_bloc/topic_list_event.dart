@@ -5,7 +5,16 @@ abstract class TopicListEvent {}
 class TopicListLoadingEvent extends TopicListEvent {
   @override
   String toString() {
-    // TODO: implement toString
+    return "Topic is loading";
+  }
+}
+
+class TopicLoadingEvent extends TopicListEvent {
+  final String topicId;
+
+  TopicLoadingEvent(this.topicId);
+  @override
+  String toString() {
     return "Topic is loading";
   }
 }
@@ -47,6 +56,13 @@ class TopicListLoadedEvent extends TopicListEvent {
   @override
   String toString() {
     return "Event TopicListLoaded:";
+  }
+}
+
+class TopicLoadedEvent extends TopicListEvent {
+  @override
+  String toString() {
+    return "Event TopicLoaded:";
   }
 }
 

@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:quizlet_frontend/main/main_page.dart';
-import 'package:quizlet_frontend/topic/bloc/topic_bloc.dart';
+import 'package:quizlet_frontend/topic/topic_cubit/topic_bloc.dart';
+import 'package:quizlet_frontend/topic/topic_list_bloc/topic_list_bloc.dart';
 import 'package:quizlet_frontend/utilities/router_manager.dart';
 import 'package:quizlet_frontend/word/bloc/word_bloc.dart';
+import 'package:quizlet_frontend/login/login_page.dart';
 
 void main() {
   runApp(MultiBlocProvider(
@@ -11,9 +13,13 @@ void main() {
       BlocProvider<TopicListBloc>(
         create: (context) => TopicListBloc(),
       ),
+      BlocProvider<TopicCubit>(
+        create: (context) =>
+            TopicCubit(topicListBloc: BlocProvider.of<TopicListBloc>(context)),
+      ),
       BlocProvider<WordCubit>(
         create: (context) => WordCubit(),
-      )
+      ),
     ],
     child: const MaterialApp(
       initialRoute: Routes.mainPage,

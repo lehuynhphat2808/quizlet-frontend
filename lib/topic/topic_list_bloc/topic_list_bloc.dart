@@ -1,9 +1,9 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:quizlet_frontend/topic/topic_list_bloc/topic_list_event.dart';
+import 'package:quizlet_frontend/topic/topic_list_bloc/topic_list_state.dart';
 import 'package:quizlet_frontend/topic/topic_model.dart';
 import 'package:quizlet_frontend/services/api_service.dart';
-import 'package:quizlet_frontend/topic/bloc/topic_event.dart';
-import 'package:quizlet_frontend/topic/bloc/topic_state.dart';
 import 'package:quizlet_frontend/utilities/page_response.dart';
 
 class TopicListBloc extends Bloc<TopicListEvent, TopicListState> {
@@ -16,6 +16,7 @@ class TopicListBloc extends Bloc<TopicListEvent, TopicListState> {
     on<TopicListNotifyErrorEvent>((event, emit) {
       emit(TopicListErrorState());
     });
+    on<TopicLoadingEvent>(_fetchTopic);
   }
 
   @override
@@ -42,13 +43,12 @@ class TopicListBloc extends Bloc<TopicListEvent, TopicListState> {
     }
   }
 
-  void _loadTopics() {
+  void loadTopics() {
     add(TopicListLoadingEvent());
   }
 
   Future<void> _fetchTopics(
       TopicListEvent topicListEvent, Emitter<TopicListState> emit) async {
-    final List<TopicModel> listTopics = [];
     emit(TopicListLoadingState());
     late PageResponse pageResponse;
     try {
@@ -59,10 +59,9 @@ class TopicListBloc extends Bloc<TopicListEvent, TopicListState> {
       }
       handleError();
     }
-    for (Map<String, dynamic> i in pageResponse.items) {
-      listTopics.add(TopicModel.fromJson(i));
-    }
-
+    print('pageResponse: $pageResponse');
+    List<TopicModel> listTopics =
+        TopicModel.getTopicModelList(pageResponse.items);
     add(TopicListLoadedEvent());
     emit(TopicListLoadedState(topics: listTopics));
   }
@@ -77,11 +76,27 @@ class TopicListBloc extends Bloc<TopicListEvent, TopicListState> {
       handleError();
       return;
     }
-    print('ooooooooooooooooooooooooooooooooooooooooooooooooooooooo');
     emit(TopicInsertedState(resTopic));
+    loadTopics();
   }
 
   void handleError() {
     add(TopicListNotifyErrorEvent());
+  }
+
+  void _fetchTopic(
+      TopicLoadingEvent event, Emitter<TopicListState> emit) async {
+    late TopicModel topic;
+    emit(TopicLoadingState());
+    try {
+      topic = await ApiService.getTopic(event.topicId);
+    } catch (e) {
+      if (kDebugMode) {
+        print('_fetchTopic error: $e');
+      }
+      handleError();
+    }
+
+    emit(TopicLoadedState(topic: topic));
   }
 }

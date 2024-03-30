@@ -8,7 +8,7 @@ import 'package:quizlet_frontend/word/word_model.dart';
 
 class ApiService {
   static const String _token =
-      'eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6IkY0U25PSlJsZUc2OVFkUHZCNzhocCJ9.eyJpc3MiOiJodHRwczovL3F1aXpsZXQuanAuYXV0aDAuY29tLyIsInN1YiI6Imdvb2dsZS1vYXV0aDJ8MTE0ODAxNDYxMDIxMTE0Mjk5MDY4IiwiYXVkIjpbImh0dHA6Ly9sb2NhbGhvc3Q6ODA4MCIsImh0dHBzOi8vcXVpemxldC5qcC5hdXRoMC5jb20vdXNlcmluZm8iXSwiaWF0IjoxNzExNDI0NTk1LCJleHAiOjE3MTE1MTA5OTUsInNjb3BlIjoib3BlbmlkIHByb2ZpbGUgZW1haWwiLCJhenAiOiJmSkI5Tk5BUmQ3bTlqdUxGR2JDYTdybHBXcGcwd3V1biIsInBlcm1pc3Npb25zIjpbXX0.L-2LrFinr_z6ce_vN3YjfSWCOKKjsEXHx9ZUiJgFBv2E7KX7D1yTN_IqtsJ-HcyJvDEy6C8l8_WMMz5HxzgbTY26kysLdzwc8PZ21KPsfHv5CdWxpABDrqcKYBY1dox3aHJqg4CYGPnZGh785KxMesPLRsn0Hm38Af2Aorh_lhONnhi_WUgQ5ZgboTMzMxQps0oMITHpT_RPXjNlFuYSlF9Pn6fKXZD_JIyz6IqucDAjUG9cyATbbSBKByND1kx7KyNkbTG0GwQAf-ESDhZ2aoksaE-vP27ldrchAv_onSPw_p9DKWGF3ya_M4UVPrpWLSvmtKgOKntTHnNMnCOCpw';
+      'eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6IkY0U25PSlJsZUc2OVFkUHZCNzhocCJ9.eyJpc3MiOiJodHRwczovL3F1aXpsZXQuanAuYXV0aDAuY29tLyIsInN1YiI6Imdvb2dsZS1vYXV0aDJ8MTA4MDEyNjE5MzA2MzAyNTU4OTUyIiwiYXVkIjpbImh0dHA6Ly9sb2NhbGhvc3Q6ODA4MCIsImh0dHBzOi8vcXVpemxldC5qcC5hdXRoMC5jb20vdXNlcmluZm8iXSwiaWF0IjoxNzExNzgyNjQwLCJleHAiOjE3MTE4NjkwNDAsInNjb3BlIjoib3BlbmlkIHByb2ZpbGUgZW1haWwiLCJhenAiOiJmSkI5Tk5BUmQ3bTlqdUxGR2JDYTdybHBXcGcwd3V1biIsInBlcm1pc3Npb25zIjpbXX0.krsJddxUPoEPcP8k0e_E9PwFImP2g6cllzDMMDXyjO-QWhsNBRvTwzaw2jxtI1sibbVK2CJICZgFJOSh5wphyJuQ11ZhgoCUTSGkRFfcilT_RJ832n38V8OIVEcKBv91NRl3nw4IhNdzXqw8FqTPU9zfwLSZztvDxq81y_KMvGsXlfolB9EddNGanhqZ8BCQ3CyBA7UXOchQFrY4obEjtQsG4xuzYy14ctmEEG5D45dVvUm9JoPLfBOmQdzDCC4zcqCs2y658jB4zHvMB-lp8BY-sm4UPhAt-4o3OrEBWUFFtTtIcfyc7dGhLmLaoFpSQ-WvZS8RyKm_rqEYvIGbjg';
   static String baseUrl = 'http://10.0.2.2:8080/api/v1/';
   static Map<String, String> get headers => {
         "Content-Type": "application/json",
@@ -48,6 +48,30 @@ class ApiService {
       return WordModel.fromJson(response);
     } else {
       throw Exception("Load page fail ${res.statusCode}");
+    }
+  }
+
+  static Future<TopicModel> getTopic(String id) async {
+    print('APIGETTOPICID $id');
+    var res =
+        await http.get(Uri.parse('${baseUrl}topics/$id'), headers: headers);
+    if (res.statusCode == 200) {
+      Map<String, dynamic> response = jsonDecode(res.body);
+      print(response);
+      return TopicModel.fromJson(response);
+    } else {
+      throw Exception("getTopic fail ${res.statusCode}");
+    }
+  }
+
+  static Future<void> deleteTopic(String topicId) async {
+    var res = await http.delete(Uri.parse('${baseUrl}topics/$topicId'),
+        headers: headers);
+    if (res.statusCode != 200) {
+      throw Exception("getTopic fail ${res.statusCode}");
+    }
+    if (kDebugMode) {
+      print('Delete Topic: $topicId');
     }
   }
 }

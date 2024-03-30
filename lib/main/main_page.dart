@@ -2,14 +2,13 @@ import 'dart:async';
 
 import 'package:animated_notch_bottom_bar/animated_notch_bottom_bar/animated_notch_bottom_bar.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:quizlet_frontend/folder/folder_page.dart';
 import 'package:quizlet_frontend/home/home_page.dart';
 import 'package:quizlet_frontend/user/user_settingPage.dart';
 import 'package:animated_bottom_navigation_bar/animated_bottom_navigation_bar.dart';
 import 'package:quizlet_frontend/utilities/router_manager.dart';
 
-import '../Topic/topic_page.dart';
+import '../topic/topic_list_page.dart';
 // import 'package:flutter_svg/flutter_svg.dart';
 
 class MainPage extends StatefulWidget {
@@ -26,7 +25,7 @@ class _MainPageState extends State<MainPage> {
   /// Controller to handle bottom nav bar and also handles initial page
   final _controller = NotchBottomBarController(index: 0);
 
-  int maxCount = 5;
+  int maxCount = 4;
 
   @override
   void dispose() {
@@ -39,23 +38,15 @@ class _MainPageState extends State<MainPage> {
   /// widget list
   final List<Widget> bottomBarPages = [
     const HomePage(),
-    const TopicPage(),
-    Container(),
+    const TopicListPage(),
     const FolderPage(),
     const UserSettingPage(),
   ];
-  final List<String> topicString = [
-    'Home',
-    'Topic',
-    '',
-    'Folder',
-    'User Setting'
-  ];
+  final List<String> topicString = ['Home', 'Topic', 'Folder', 'User Setting'];
 
   final List<IconData?> actionList = [
     null,
     Icons.add,
-    null,
     Icons.add,
     null,
   ];

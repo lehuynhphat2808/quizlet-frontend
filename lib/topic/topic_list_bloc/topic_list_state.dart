@@ -6,6 +6,14 @@ class TopicListInitialState extends TopicListState {}
 
 class TopicListLoadingState extends TopicListState {}
 
+class TopicLoadingState extends TopicListState {}
+
+class TopicLoadedState extends TopicListState {
+  final TopicModel topic;
+
+  TopicLoadedState({required this.topic});
+}
+
 class TopicInsertedState extends TopicListState {
   final TopicModel topicModel;
 

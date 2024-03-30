@@ -2,12 +2,13 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:quizlet_frontend/topic/bloc/topic_state.dart';
 import 'package:quizlet_frontend/topic/topic_model.dart';
-import 'package:quizlet_frontend/topic/bloc/topic_bloc.dart';
-import 'package:quizlet_frontend/topic/bloc/topic_event.dart';
 import 'package:quizlet_frontend/word/bloc/word_bloc.dart';
 import 'package:quizlet_frontend/word/word_model.dart';
+
+import '../topic/topic_list_bloc/topic_list_bloc.dart';
+import '../topic/topic_list_bloc/topic_list_event.dart';
+import '../topic/topic_list_bloc/topic_list_state.dart';
 
 class AddPage extends StatefulWidget {
   const AddPage({super.key});

@@ -1,21 +1,23 @@
+import 'package:quizlet_frontend/word/word_model.dart';
+
 class TopicModel {
   String? id;
   String name;
   int? wordCount;
-  bool public;
+  bool? public;
   String url;
+  List<WordModel>? words;
 
-  static List<TopicModel> topicModelList = [];
-
-  TopicModel({
-    this.id,
-    required this.name,
-    this.wordCount,
-    this.url = 'string',
-    required this.public,
-  });
+  TopicModel(
+      {this.id,
+      required this.name,
+      this.wordCount,
+      this.url = 'string',
+      this.public,
+      this.words});
 
   static List<TopicModel> getTopicModelList(List<dynamic> dynamicList) {
+    List<TopicModel> topicModelList = [];
     for (Map<String, dynamic> i in dynamicList) {
       topicModelList.add(TopicModel.fromJson(i));
     }
@@ -28,6 +30,9 @@ class TopicModel {
         wordCount: json["wordCount"],
         url: json["url"] ?? 'String',
         public: json["public"],
+        words: json["words"] == null
+            ? null
+            : WordModel.getWordModelList(json["words"]),
       );
 
   Map<String, dynamic> toJson() => {
@@ -36,5 +41,6 @@ class TopicModel {
         "url": url,
         "wordCount": wordCount,
         "public": public,
+        "words": words,
       };
 }

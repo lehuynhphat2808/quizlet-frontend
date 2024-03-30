@@ -21,6 +21,18 @@ class WordModel {
     this.topicId,
   });
 
+  static late List<WordModel> wordModelList;
+
+  static List<WordModel> getWordModelList(List<dynamic> dynamicList) {
+    wordModelList = [];
+    for (Map<String, dynamic> i in dynamicList) {
+      print('getWordModelList $i');
+
+      wordModelList.add(WordModel.fromJson(i));
+    }
+    return wordModelList;
+  }
+
   WordModel copyWith({
     String? id,
     String? name,
