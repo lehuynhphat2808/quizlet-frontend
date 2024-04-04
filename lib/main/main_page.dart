@@ -141,7 +141,7 @@ class _MainPageState extends State<MainPage> {
                     child: const Text('Topic'),
                     onPressed: () {
                       Navigator.pop(context);
-                      Navigator.pushNamed(context, Routes.addPage);
+                      Navigator.pushNamed(context, Routes.updateTopicPage);
                     },
                   ),
                 ),
@@ -192,7 +192,7 @@ class _MainPageState extends State<MainPage> {
                     onPressed: () {
                       print('yyyyyyyyyyyyyyyyyyyyyyyyy');
 
-                      Navigator.pushNamed(context, Routes.addPage);
+                      Navigator.pushNamed(context, Routes.updateTopicPage);
                       print('xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx');
                     },
                   ),

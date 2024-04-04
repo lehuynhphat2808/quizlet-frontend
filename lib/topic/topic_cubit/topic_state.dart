@@ -6,6 +6,10 @@ class TopicInitialState extends TopicState {}
 
 class TopicLoadingState extends TopicState {}
 
+class TopicUploadingState extends TopicState {}
+
+class TopicUploadedState extends TopicState {}
+
 class TopicLoadedState extends TopicState {
   final TopicModel topic;
 

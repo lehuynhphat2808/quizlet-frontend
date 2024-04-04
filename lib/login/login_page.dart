@@ -115,6 +115,8 @@ class _LoginPageState extends State<LoginPage> {
 
                               setState(() {
                                 _credentials = credentials;
+                                print(_credentials!.user.sub);
+                                print(_credentials!.idToken);
                               });
                             },
                             child: Container(

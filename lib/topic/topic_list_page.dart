@@ -52,6 +52,7 @@ class _TopicListPageState extends State<TopicListPage> {
   }
 
   Widget _buildTopicItem(TopicModel topicModel) {
+    print('topicModel: ${topicModel.wordCount}');
     return GestureDetector(
       onTap: () {
         Navigator.pushNamed(context, Routes.topicPage,
@@ -66,7 +67,7 @@ class _TopicListPageState extends State<TopicListPage> {
                 children: [
                   ListTile(
                     title: Text(
-                      topicModel.name,
+                      topicModel.name!,
                       style: const TextStyle(fontWeight: FontWeight.bold),
                     ),
                     subtitle: Text('${topicModel.wordCount} words'),
