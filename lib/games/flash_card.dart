@@ -15,7 +15,15 @@ class FlashCardPage extends StatefulWidget {
 }
 
 class _FlashCardPageState extends State<FlashCardPage> {
-  bool isDragging = false;
+  bool showBorder = false;
+  void changeValue(bool value) {
+    setState(() {
+      showBorder = value;
+    });
+  }
+
+  int currentItem = 0;
+
   int studiedWord = 0;
   int studyingWord = 0;
   final List<SwipeItem> _swipeItems = <SwipeItem>[];
@@ -64,10 +72,10 @@ class _FlashCardPageState extends State<FlashCardPage> {
       body: Column(
         children: [
           LinearProgressBar(
-            maxSteps: 3,
+            maxSteps: widget.wordModels.length,
             progressType:
                 LinearProgressBar.progressTypeLinear, // Use Dots progress
-            currentStep: 1,
+            currentStep: currentItem + 1,
             progressColor: Colors.deepPurple,
             backgroundColor: Colors.grey,
           ),
@@ -123,7 +131,7 @@ class _FlashCardPageState extends State<FlashCardPage> {
                   likeTag: const Text('Đang học'),
                   nopeTag: const Text('Đã học'),
                   itemBuilder: (BuildContext context, int index) {
-                    return _buildCardWordItem(widget.wordModels[index]);
+                    return _buildCardWordItem(widget.wordModels[index], index);
                   },
                   onStackFinished: () {
                     ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
@@ -131,10 +139,16 @@ class _FlashCardPageState extends State<FlashCardPage> {
                       duration: Duration(milliseconds: 500),
                     ));
                   },
+                  itemChanged: (SwipeItem item, int index) {
+                    setState(() {
+                      currentItem = index;
+                    });
+                  },
                   leftSwipeAllowed: true,
                   rightSwipeAllowed: true,
                   upSwipeAllowed: true,
                   fillSpace: false,
+                  showBorder: changeValue,
                 ),
               ),
             ),
@@ -175,26 +189,28 @@ class _FlashCardPageState extends State<FlashCardPage> {
     );
   }
 
-  Widget _buildCardWordItem(WordModel wordModel) {
+  Widget _buildCardWordItem(WordModel wordModel, int index) {
     return FlipCard(
       // fill: Fill
       //     .fillBack, // Fill the back side of the card to make in the same size as the front.
       direction: FlipDirection.HORIZONTAL, // default
       side: CardSide.FRONT, // The side to initially display.
       front: Container(
-        child: _buildCardWord(wordModel.name!),
+        child: _buildCardWord(wordModel.name!, index),
       ),
-      back: _buildCardWord(wordModel.definition!),
+      back: _buildCardWord(wordModel.definition!, index),
     );
   }
 
-  Widget _buildCardWord(String word) {
+  Widget _buildCardWord(String word, int index) {
     return Card(
       color: Colors.white,
       child: Container(
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(15.0),
-            border: isDragging ? Border.all(color: Colors.red) : null,
+            border: (showBorder && index == currentItem)
+                ? Border.all(color: Colors.red, width: 1)
+                : null,
           ),
           alignment: Alignment.center,
           child: Text(
