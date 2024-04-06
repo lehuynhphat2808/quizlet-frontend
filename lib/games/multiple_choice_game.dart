@@ -2,21 +2,21 @@ import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:quizlet_frontend/word/word_model.dart';
 
-class LearningGame extends StatefulWidget {
+class MultipleChoiceGame extends StatefulWidget {
   final WordModel currentWord;
   final List<String> answerList;
   final Function? handleOnOkClick;
-  const LearningGame(
+  const MultipleChoiceGame(
       {super.key,
       required this.currentWord,
       required this.answerList,
       this.handleOnOkClick});
 
   @override
-  State<LearningGame> createState() => _LearningGameState();
+  State<MultipleChoiceGame> createState() => _MultipleChoiceGameState();
 }
 
-class _LearningGameState extends State<LearningGame> {
+class _MultipleChoiceGameState extends State<MultipleChoiceGame> {
   @override
   Widget build(BuildContext context) {
     return _buildLearningGame();
@@ -55,8 +55,8 @@ class _LearningGameState extends State<LearningGame> {
           AwesomeDialog(
             context: context,
             dismissOnTouchOutside: false,
-            dialogType: DialogType.success,
-            animType: AnimType.rightSlide,
+            dialogType: DialogType.SUCCES,
+            animType: AnimType.RIGHSLIDE,
             title: 'Correct',
             body: SizedBox(
               width: double.maxFinite,
@@ -106,8 +106,8 @@ class _LearningGameState extends State<LearningGame> {
           AwesomeDialog(
             context: context,
             dismissOnTouchOutside: false,
-            dialogType: DialogType.error,
-            animType: AnimType.rightSlide,
+            dialogType: DialogType.ERROR,
+            animType: AnimType.RIGHSLIDE,
             title: 'Wrong Answer',
             body: SizedBox(
               width: double.maxFinite,

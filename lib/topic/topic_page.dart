@@ -283,13 +283,19 @@ class _TopicPageState extends State<TopicPage> {
             ),
           ),
         ),
-        Card(
-          child: ListTile(
-            title: Text(
-              'Test',
-              style: listTileTextStyle,
+        GestureDetector(
+          onTap: () {
+            Navigator.pushNamed(context, Routes.testPage,
+                arguments: topicModel!.words);
+          },
+          child: Card(
+            child: ListTile(
+              title: Text(
+                'Test',
+                style: listTileTextStyle,
+              ),
+              leading: Image.asset('assets/images/test_icon.png', height: 20),
             ),
-            leading: Image.asset('assets/images/test_icon.png', height: 20),
           ),
         ),
         Card(

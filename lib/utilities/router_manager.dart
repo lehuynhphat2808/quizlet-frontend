@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:quizlet_frontend/games/learning_page.dart';
+import 'package:quizlet_frontend/games/test_page.dart';
 import 'package:quizlet_frontend/login/login_page.dart';
 import 'package:quizlet_frontend/topic/topic_model.dart';
 import 'package:quizlet_frontend/topic/topic_page.dart';
@@ -15,6 +16,7 @@ class Routes {
   static const String topicPage = "/topic";
   static const String flashCardPage = '/flashCard';
   static const String learningPage = '/learningPage';
+  static const String testPage = '/testPage';
 }
 
 class RouteGenerator {
@@ -51,6 +53,12 @@ class RouteGenerator {
         return MaterialPageRoute(
             settings: routeSettings,
             builder: (context) => LearningPage(
+                  wordModels: routeSettings.arguments as List<WordModel>,
+                ));
+      case Routes.testPage:
+        return MaterialPageRoute(
+            settings: routeSettings,
+            builder: (context) => TestPage(
                   wordModels: routeSettings.arguments as List<WordModel>,
                 ));
       default:

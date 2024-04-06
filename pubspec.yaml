@@ -48,8 +48,9 @@ dependencies:
   swipe_cards: ^2.0.0+1
   linear_progress_bar: ^1.1.1
   shared_preferences: ^2.2.2
-  awesome_dialog: ^3.2.0
+  awesome_dialog: ^2.2.1
   loading_animation_widget: ^1.2.1
+  rive: ^0.13.1
 
 
 dev_dependencies:
