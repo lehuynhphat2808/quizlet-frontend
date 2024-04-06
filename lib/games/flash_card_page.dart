@@ -37,12 +37,12 @@ class _FlashCardPageState extends State<FlashCardPage> {
         SwipeItem(
           likeAction: () {
             setState(() {
-              studiedWord++;
+              studyingWord++;
             });
           },
           nopeAction: () {
             setState(() {
-              studyingWord++;
+              studiedWord++;
             });
           },
 
@@ -68,7 +68,28 @@ class _FlashCardPageState extends State<FlashCardPage> {
     return Scaffold(
       backgroundColor: Colors.grey[200],
       key: _scaffoldKey,
-      appBar: AppBar(),
+      appBar: AppBar(
+        leading: IconButton(
+          icon: Icon(Icons.close),
+          onPressed: () {
+            Navigator.pop(context);
+          },
+        ),
+        actions: [
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: IconButton(onPressed: () {}, icon: Icon(Icons.settings)),
+          )
+        ],
+        title: Text(
+          '${currentItem + 1}/${widget.wordModels.length}',
+          style: TextStyle(
+              color: Colors.grey[800],
+              fontSize: 16,
+              fontWeight: FontWeight.w600),
+        ),
+        centerTitle: true,
+      ),
       body: Column(
         children: [
           LinearProgressBar(
@@ -128,8 +149,17 @@ class _FlashCardPageState extends State<FlashCardPage> {
               child: Card(
                 child: SwipeCards(
                   matchEngine: _matchEngine!,
-                  likeTag: const Text('Đang học'),
-                  nopeTag: const Text('Đã học'),
+                  likeTag: const Text(
+                    'Đã học',
+                    style: TextStyle(
+                        color: Colors.green, fontWeight: FontWeight.w600),
+                  ),
+                  nopeTag: const Text(
+                    'Đang học',
+                    style: TextStyle(
+                        color: Colors.orangeAccent,
+                        fontWeight: FontWeight.w600),
+                  ),
                   itemBuilder: (BuildContext context, int index) {
                     return _buildCardWordItem(widget.wordModels[index], index);
                   },

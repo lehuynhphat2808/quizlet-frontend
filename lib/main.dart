@@ -25,7 +25,6 @@ void main() {
       initialRoute: Routes.mainPage,
       onGenerateRoute: RouteGenerator.getRoute,
       debugShowCheckedModeBanner: false,
-      home: MainPage(),
     ),
   ));
 }

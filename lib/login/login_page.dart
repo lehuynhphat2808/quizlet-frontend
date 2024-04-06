@@ -1,6 +1,10 @@
 import 'package:animate_do/animate_do.dart';
 import 'package:auth0_flutter/auth0_flutter.dart';
 import 'package:flutter/material.dart';
+import 'package:quizlet_frontend/services/api_service.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+import '../utilities/router_manager.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -10,15 +14,12 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
-  Credentials? _credentials;
-
   late Auth0 auth0;
 
   @override
   void initState() {
     super.initState();
-    auth0 = Auth0(
-        'quizletfrontend.jp.auth0.com', 'AXvyRQgBFSYZvRf6Tfn1wIspH67KS8Am');
+    auth0 = Auth0('quizlet.jp.auth0.com', 'PXPoy9JnUzaRrdk5EK0jKTjL9uBhSHxH');
   }
 
   @override
@@ -113,11 +114,17 @@ class _LoginPageState extends State<LoginPage> {
                                   .webAuthentication(scheme: "demo")
                                   .login();
 
-                              setState(() {
-                                _credentials = credentials;
-                                print(_credentials!.user.sub);
-                                print(_credentials!.idToken);
-                              });
+                              final SharedPreferences prefs =
+                                  await SharedPreferences.getInstance();
+                              if (prefs.getString('userToken') == null) {
+                                prefs.setString(
+                                    'userToken', credentials.accessToken);
+                              } else {
+                                ApiService.token = credentials.accessToken;
+                                print('set token: ${credentials.accessToken}');
+                                print('ApiService.token: ${ApiService.token}');
+                              }
+                              await goToMainPage();
                             },
                             child: Container(
                               height: 50,
@@ -154,5 +161,9 @@ class _LoginPageState extends State<LoginPage> {
         ),
       ),
     );
+  }
+
+  Future<void> goToMainPage() async {
+    Navigator.pushReplacementNamed(context, Routes.mainPage);
   }
 }

@@ -82,7 +82,7 @@ class _MainPageState extends State<MainPage> {
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       floatingActionButton: FloatingActionButton(
         backgroundColor: Colors.green,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(100)),
+        shape: const CircleBorder(),
         onPressed: () {
           _showAddBottomPopup();
         },

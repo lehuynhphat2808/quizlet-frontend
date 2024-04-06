@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:quizlet_frontend/topic/topic_cubit/topic_bloc.dart';
 import 'package:quizlet_frontend/topic/topic_cubit/topic_state.dart';
 import 'package:quizlet_frontend/topic/topic_model.dart';
@@ -58,13 +59,13 @@ class _TopicPageState extends State<TopicPage> {
   }
 
   Widget _buildBody() {
-    return SingleChildScrollView(
-      child: BlocBuilder<TopicCubit, TopicState>(
-        builder: (BuildContext context, state) {
-          if (state is TopicLoadedState) {
-            topicModel = state.topic;
-            print('TopicModel: ${topicModel!.words}');
-            return Column(
+    return BlocBuilder<TopicCubit, TopicState>(
+      builder: (BuildContext context, state) {
+        if (state is TopicLoadedState) {
+          topicModel = state.topic;
+          print('TopicModel: ${topicModel!.words}');
+          return SingleChildScrollView(
+            child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 SizedBox(
@@ -192,12 +193,18 @@ class _TopicPageState extends State<TopicPage> {
                   ),
                 )
               ],
-            );
-          } else {
-            return const Center(child: CircularProgressIndicator());
-          }
-        },
-      ),
+            ),
+          );
+        } else {
+          return Center(
+            child: LoadingAnimationWidget.twistingDots(
+              leftDotColor: const Color(0xFF1A1A3F),
+              rightDotColor: const Color(0xFFEA3799),
+              size: 60,
+            ),
+          );
+        }
+      },
     );
   }
 
@@ -261,13 +268,19 @@ class _TopicPageState extends State<TopicPage> {
             ),
           ),
         ),
-        Card(
-          child: ListTile(
-            title: Text(
-              'Learning',
-              style: listTileTextStyle,
+        GestureDetector(
+          onTap: () {
+            Navigator.pushNamed(context, Routes.learningPage,
+                arguments: topicModel!.words);
+          },
+          child: Card(
+            child: ListTile(
+              title: Text(
+                'Learning',
+                style: listTileTextStyle,
+              ),
+              leading: Image.asset('assets/images/learning.png', height: 20),
             ),
-            leading: Image.asset('assets/images/learning.png', height: 20),
           ),
         ),
         Card(

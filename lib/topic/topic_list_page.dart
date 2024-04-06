@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:quizlet_frontend/services/api_service.dart';
 import 'package:quizlet_frontend/topic/topic_list_bloc/topic_list_bloc.dart';
 import 'package:quizlet_frontend/topic/topic_list_bloc/topic_list_event.dart';
 import 'package:quizlet_frontend/topic/topic_list_bloc/topic_list_state.dart';
+import 'package:loading_animation_widget/loading_animation_widget.dart';
 
 import 'package:quizlet_frontend/topic/topic_model.dart';
 import 'package:quizlet_frontend/utilities/router_manager.dart';
@@ -24,6 +26,7 @@ class _TopicListPageState extends State<TopicListPage> {
 
   @override
   Widget build(BuildContext context) {
+    print('Api token: ${ApiService.token}');
     return _buildListTopic;
   }
 
@@ -31,7 +34,9 @@ class _TopicListPageState extends State<TopicListPage> {
     return BlocBuilder<TopicListBloc, TopicListState>(
       builder: (BuildContext builderContext, TopicListState state) {
         if (state is TopicListLoadingState) {
-          return const CircularProgressIndicator();
+          return Center(
+              child: LoadingAnimationWidget.discreteCircle(
+                  color: Colors.grey[300]!, size: 40));
         } else if (state is TopicListLoadedState) {
           return ListView.builder(
             itemBuilder: (context, index) {

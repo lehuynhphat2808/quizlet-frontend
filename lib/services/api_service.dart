@@ -1,14 +1,22 @@
 import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
+import 'package:quizlet_frontend/helper/helper.dart';
 import 'package:quizlet_frontend/topic/topic_model.dart';
 import 'package:quizlet_frontend/utilities/page_response.dart';
 import 'package:http/http.dart' as http;
 import 'package:quizlet_frontend/word/word_model.dart';
 
 class ApiService {
-  static const String _token =
-      'eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6IkY0U25PSlJsZUc2OVFkUHZCNzhocCJ9.eyJpc3MiOiJodHRwczovL3F1aXpsZXQuanAuYXV0aDAuY29tLyIsInN1YiI6Imdvb2dsZS1vYXV0aDJ8MTE0ODAxNDYxMDIxMTE0Mjk5MDY4IiwiYXVkIjpbImh0dHA6Ly9sb2NhbGhvc3Q6ODA4MCIsImh0dHBzOi8vcXVpemxldC5qcC5hdXRoMC5jb20vdXNlcmluZm8iXSwiaWF0IjoxNzEyMjAxNTIxLCJleHAiOjE3MTIyODc5MjEsInNjb3BlIjoib3BlbmlkIHByb2ZpbGUgZW1haWwiLCJhenAiOiJmSkI5Tk5BUmQ3bTlqdUxGR2JDYTdybHBXcGcwd3V1biIsInBlcm1pc3Npb25zIjpbXX0.mceOIL9NKuNWlI5uIJm5Ep0fGlbaTXRC7yBAZY9uoXaFfoRCSrZ9i8kRMcJWhcXetQCKVDFGI0fjXhMy2weZ9dPU3G2afK9imM1NTjB_LHc2oyebJnAVkQA1b4wlsLTagmSlccU063TuedK-1qiZjLSCclCwPq9O-99jAORmAACmnTAZOaSLAmdUHkckhpa2_TO9xm7YdltfbEpq6NQk_81wNYhPej41N4r7XKl1yjorSI2B1aJl4fgVhzFC__nPqFJCJ12JR6ru-OySXCSyhQemUsr9DnnwtsmphtIYUPobxEWvUeVPhCo2k_Kw6SPdEYPQcasB4KV2bEpDAx0iHg';
+  // static String _token = "";
+  static String _token =
+      'eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6IkY0U25PSlJsZUc2OVFkUHZCNzhocCJ9.eyJpc3MiOiJodHRwczovL3F1aXpsZXQuanAuYXV0aDAuY29tLyIsInN1YiI6Imdvb2dsZS1vYXV0aDJ8MTE0ODAxNDYxMDIxMTE0Mjk5MDY4IiwiYXVkIjpbImh0dHA6Ly9sb2NhbGhvc3Q6ODA4MCIsImh0dHBzOi8vcXVpemxldC5qcC5hdXRoMC5jb20vdXNlcmluZm8iXSwiaWF0IjoxNzEyMzg1MjczLCJleHAiOjE3MTI0NzE2NzMsInNjb3BlIjoib3BlbmlkIHByb2ZpbGUgZW1haWwiLCJhenAiOiJmSkI5Tk5BUmQ3bTlqdUxGR2JDYTdybHBXcGcwd3V1biIsInBlcm1pc3Npb25zIjpbXX0.X6SnnGABq1HsJKnm14s7zGbmZMU611n1HecluLPi7UevXmMEK0XK7JgG4kEoHHiFTG4R1IlG52pjjjr5sJqEqdGjbB1KFT6cJ4Ibz4_-6QPUMJHTeY--VENOvB16gdtufRVy8ogkyBrPz7Z-BtZxKJRi5ThJZcRYQJlifxxML_IBitHWNW3Ook6M3riSjzJyuozB5z2GO39atZNJ2-7ExndlppJHeK-F6aQdsSTdIfVXf0HqchHwoSZjtSa5JaTM35Vj4bFFDbWZdCb6mJL0yxrMayoWk9dU8eP11H9Zse75rW8rYhcU4rnuvuzW8_8Z9qbBvWWazPt5fep6Pc5tYw';
+  static set token(newToken) {
+    _token = newToken;
+  }
+
+  static get token => _token;
+
   static String baseUrl = 'http://10.0.2.2:8080/api/v1/';
   static Map<String, String> get headers => {
         "Content-Type": "application/json",

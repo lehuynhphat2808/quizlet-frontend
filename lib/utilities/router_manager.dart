@@ -1,21 +1,29 @@
 import 'package:flutter/material.dart';
+import 'package:quizlet_frontend/games/learning_page.dart';
+import 'package:quizlet_frontend/login/login_page.dart';
 import 'package:quizlet_frontend/topic/topic_model.dart';
 import 'package:quizlet_frontend/topic/topic_page.dart';
 import 'package:quizlet_frontend/add_page/update_topic_page.dart';
 import 'package:quizlet_frontend/main/main_page.dart';
-import 'package:quizlet_frontend/games/flash_card.dart';
+import 'package:quizlet_frontend/games/flash_card_page.dart';
 import 'package:quizlet_frontend/word/word_model.dart';
 
 class Routes {
+  static const String loginPage = "/loginPage";
   static const String mainPage = "/";
   static const String updateTopicPage = "/updateTopicPage";
   static const String topicPage = "/topic";
   static const String flashCardPage = '/flashCard';
+  static const String learningPage = '/learningPage';
 }
 
 class RouteGenerator {
   static Route<dynamic> getRoute(RouteSettings routeSettings) {
     switch (routeSettings.name) {
+      case Routes.loginPage:
+        return MaterialPageRoute(
+            settings: routeSettings, builder: (context) => const LoginPage());
+
       case Routes.mainPage:
         return MaterialPageRoute(
             settings: routeSettings, builder: (context) => const MainPage());
@@ -37,6 +45,12 @@ class RouteGenerator {
         return MaterialPageRoute(
             settings: routeSettings,
             builder: (context) => FlashCardPage(
+                  wordModels: routeSettings.arguments as List<WordModel>,
+                ));
+      case Routes.learningPage:
+        return MaterialPageRoute(
+            settings: routeSettings,
+            builder: (context) => LearningPage(
                   wordModels: routeSettings.arguments as List<WordModel>,
                 ));
       default:
