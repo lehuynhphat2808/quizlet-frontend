@@ -2,7 +2,7 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:linear_progress_bar/linear_progress_bar.dart';
-import 'package:quizlet_frontend/games/learning_page.dart';
+import 'package:quizlet_frontend/games/essay_questions.dart';
 import 'package:quizlet_frontend/games/multiple_choice_game.dart';
 import 'package:quizlet_frontend/games/yesno_game.dart';
 
@@ -28,9 +28,11 @@ class _TestPageState extends State<TestPage> {
     switch (randomCase) {
       case 0:
         questionWidget = YesNoGame(
-            currentWord: widget.wordModels[currentItem],
-            answer: widget.wordModels[random.nextInt(widget.wordModels.length)]
-                .definition!);
+          currentWord: widget.wordModels[currentItem],
+          answer: widget
+              .wordModels[random.nextInt(widget.wordModels.length)].definition!,
+          handleOnOkClick: _nextWord,
+        );
       case 1:
         int maxAnswer =
             widget.wordModels.length < 4 ? widget.wordModels.length : 4;
@@ -42,13 +44,20 @@ class _TestPageState extends State<TestPage> {
           }
         }
         questionWidget = MultipleChoiceGame(
-            currentWord: widget.wordModels[currentItem],
-            answerList: randomWordList);
+          currentWord: widget.wordModels[currentItem],
+          answerList: randomWordList,
+          handleOnOkClick: _nextWord,
+        );
+      case 2:
+        questionWidget = EssayGame(
+          currentWord: widget.wordModels[currentItem],
+          handleOnOkClick: _nextWord,
+        );
     }
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
-          icon: Icon(Icons.close),
+          icon: const Icon(Icons.close),
           onPressed: () {
             Navigator.pop(context);
           },
@@ -78,7 +87,21 @@ class _TestPageState extends State<TestPage> {
           backgroundColor: Colors.grey,
         ),
         questionWidget,
+        const SizedBox(
+          height: 20,
+        ),
       ]),
     );
+  }
+
+  void _nextWord() {
+    print('currentItem: $currentItem');
+    if (currentItem == widget.wordModels.length - 1) {
+      Navigator.pop(context);
+    } else {
+      setState(() {
+        currentItem++;
+      });
+    }
   }
 }

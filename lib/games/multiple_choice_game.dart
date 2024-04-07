@@ -55,8 +55,8 @@ class _MultipleChoiceGameState extends State<MultipleChoiceGame> {
           AwesomeDialog(
             context: context,
             dismissOnTouchOutside: false,
-            dialogType: DialogType.SUCCES,
-            animType: AnimType.RIGHSLIDE,
+            dialogType: DialogType.success,
+            animType: AnimType.rightSlide,
             title: 'Correct',
             body: SizedBox(
               width: double.maxFinite,
@@ -106,8 +106,8 @@ class _MultipleChoiceGameState extends State<MultipleChoiceGame> {
           AwesomeDialog(
             context: context,
             dismissOnTouchOutside: false,
-            dialogType: DialogType.ERROR,
-            animType: AnimType.RIGHSLIDE,
+            dialogType: DialogType.error,
+            animType: AnimType.rightSlide,
             title: 'Wrong Answer',
             body: SizedBox(
               width: double.maxFinite,

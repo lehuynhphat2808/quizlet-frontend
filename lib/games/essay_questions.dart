@@ -1,98 +1,55 @@
 import 'package:awesome_dialog/awesome_dialog.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:quizlet_frontend/word/word_model.dart';
 
-class YesNoGame extends StatefulWidget {
+class EssayGame extends StatefulWidget {
   final WordModel currentWord;
-  final String answer;
   final Function? handleOnOkClick;
-  const YesNoGame(
-      {super.key,
-      required this.currentWord,
-      this.handleOnOkClick,
-      required this.answer});
+  const EssayGame({super.key, required this.currentWord, this.handleOnOkClick});
 
   @override
-  State<YesNoGame> createState() => _YesNoGameState();
+  State<EssayGame> createState() => _EssayGameState();
 }
 
-class _YesNoGameState extends State<YesNoGame> {
+class _EssayGameState extends State<EssayGame> {
+  final TextEditingController _textEditingController = TextEditingController();
   @override
-  Widget build(BuildContext context) {
-    return _buildYesNoGame();
+  void dispose() {
+    _textEditingController.dispose();
+    super.dispose();
   }
 
-  Widget _buildYesNoGame() {
-    print('currentWord.name: ${widget.currentWord.name}');
-    print('answer: ${widget.answer}');
+  @override
+  Widget build(BuildContext context) {
+    return _buildLearningGame();
+  }
 
+  Widget _buildLearningGame() {
     return Expanded(
       child: Column(
         children: [
           Expanded(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Container(
-                  alignment: Alignment.center,
-                  child: Text(
-                    widget.currentWord.name!,
-                    style: const TextStyle(fontSize: 32),
-                  ),
-                ),
-                Container(
-                  alignment: Alignment.center,
-                  child: Text(
-                    widget.answer,
-                    style: const TextStyle(fontSize: 32),
-                  ),
-                ),
-              ],
+            child: Container(
+              alignment: Alignment.center,
+              child: Text(
+                widget.currentWord.name!,
+                style: const TextStyle(fontSize: 32),
+              ),
             ),
           ),
-          _buildAnswer('Yes'),
-          _buildAnswer('No'),
+          Container(
+              padding: const EdgeInsets.all(8),
+              child: TextField(
+                controller: _textEditingController,
+                onSubmitted: (value) {
+                  if (value == widget.currentWord.definition) {
+                    _showCorrectDialog();
+                  } else {
+                    _showWrongDialog();
+                  }
+                },
+              ))
         ],
-      ),
-    );
-  }
-
-  Widget _buildAnswer(String text) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-      width: double.maxFinite,
-      child: TextButton(
-        onPressed: () async {
-          print(
-              'widget.answer: ${widget.answer}, widget.currentWord.definition: ${widget.currentWord.definition} ');
-          print(
-              'widget.answer == widget.currentWord.definition: ${widget.answer == widget.currentWord.definition}');
-          if (widget.answer == widget.currentWord.definition) {
-            if (text == 'Yes') {
-              _showCorrectDialog();
-            } else {
-              _showWrongDialog();
-            }
-          } else {
-            if (text == "No") {
-              _showCorrectDialog();
-            } else {
-              _showWrongDialog();
-            }
-          }
-        },
-        style: TextButton.styleFrom(
-          shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(5),
-              side: BorderSide(color: Colors.grey[400]!)),
-        ),
-        child: Text(
-          text,
-          style:
-              TextStyle(color: Colors.grey[800], fontWeight: FontWeight.w400),
-        ),
       ),
     );
   }
@@ -161,14 +118,12 @@ class _YesNoGameState extends State<YesNoGame> {
         child: Column(
           children: [
             Container(
-              width: double.infinity,
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
                 color: Colors.red,
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Row(
-                mainAxisAlignment: MainAxisAlignment.start,
                 children: [
                   Image.asset(
                     'assets/images/sad_icon.png',
@@ -178,34 +133,41 @@ class _YesNoGameState extends State<YesNoGame> {
                   const SizedBox(
                     width: 8,
                   ),
-                  const SizedBox(
-                    width: 240,
-                    child: Text(
-                      'You are wrong! This is not correct answer',
-                      overflow: TextOverflow.ellipsis,
-                      maxLines: 3,
-                      style: TextStyle(color: Colors.white),
-                    ),
+                  const Text(
+                    'Learn this word!',
+                    style: TextStyle(color: Colors.white),
                   ),
                 ],
               ),
             ),
-            Container(
-              width: double.maxFinite,
+            Padding(
               padding: const EdgeInsets.all(8),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
-                    'No',
-                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.w400),
+                  Text(
+                    widget.currentWord.name!,
+                    style: const TextStyle(
+                        fontSize: 20, fontWeight: FontWeight.w400),
                   ),
                   const Text(
-                    'Match',
+                    'Right answer',
                     style: TextStyle(color: Colors.green),
                   ),
                   Text(
                     widget.currentWord.definition!,
+                    style: const TextStyle(
+                        fontSize: 20, fontWeight: FontWeight.w400),
+                  ),
+                  const Divider(
+                    thickness: 1,
+                  ),
+                  const Text(
+                    'You think',
+                    style: TextStyle(color: Colors.red),
+                  ),
+                  Text(
+                    _textEditingController.text,
                     style: const TextStyle(
                         fontSize: 20, fontWeight: FontWeight.w400),
                   ),
