@@ -25,6 +25,7 @@ class _TestPageState extends State<TestPage> {
     late Widget questionWidget;
     Random random = Random();
     var randomCase = random.nextInt(3);
+    print('randomCase: $randomCase');
     switch (randomCase) {
       case 0:
         questionWidget = YesNoGame(

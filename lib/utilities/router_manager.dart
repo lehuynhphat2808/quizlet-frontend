@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:quizlet_frontend/games/card_pairing_game.dart';
 import 'package:quizlet_frontend/games/learning_page.dart';
 import 'package:quizlet_frontend/games/test_page.dart';
+import 'package:quizlet_frontend/leading_board_page/leading_board_page.dart';
 import 'package:quizlet_frontend/login/login_page.dart';
 import 'package:quizlet_frontend/topic/topic_model.dart';
 import 'package:quizlet_frontend/topic/topic_page.dart';
@@ -12,11 +14,13 @@ import 'package:quizlet_frontend/word/word_model.dart';
 class Routes {
   static const String loginPage = "/loginPage";
   static const String mainPage = "/";
+  static const String leadingBoadPage = "/leadingBoad";
   static const String updateTopicPage = "/updateTopicPage";
   static const String topicPage = "/topic";
   static const String flashCardPage = '/flashCard';
   static const String learningPage = '/learningPage';
   static const String testPage = '/testPage';
+  static const String cardPairing = '/cardPairing';
 }
 
 class RouteGenerator {
@@ -29,6 +33,12 @@ class RouteGenerator {
       case Routes.mainPage:
         return MaterialPageRoute(
             settings: routeSettings, builder: (context) => const MainPage());
+      case Routes.leadingBoadPage:
+        return MaterialPageRoute(
+            settings: routeSettings,
+            builder: (context) => LeadingBoardPage(
+                  id: routeSettings.arguments.toString(),
+                ));
       case Routes.updateTopicPage:
         return MaterialPageRoute(
             settings: routeSettings,
@@ -61,6 +71,11 @@ class RouteGenerator {
             builder: (context) => TestPage(
                   wordModels: routeSettings.arguments as List<WordModel>,
                 ));
+      case Routes.cardPairing:
+        return MaterialPageRoute(
+            settings: routeSettings,
+            builder: (context) => CardPairingGame(
+                wordList: routeSettings.arguments as List<WordModel>));
       default:
         return unDefinedRoute();
     }

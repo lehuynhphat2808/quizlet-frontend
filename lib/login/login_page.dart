@@ -19,6 +19,14 @@ class _LoginPageState extends State<LoginPage> {
   @override
   void initState() {
     super.initState();
+    Future.microtask(() async {
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      final String? userToken = prefs.getString('userToken');
+      if (userToken != null && mounted) {
+        ApiService.token = userToken;
+        Navigator.pushReplacementNamed(context, Routes.mainPage);
+      }
+    });
     auth0 = Auth0('quizlet.jp.auth0.com', 'PXPoy9JnUzaRrdk5EK0jKTjL9uBhSHxH');
   }
 
@@ -112,7 +120,7 @@ class _LoginPageState extends State<LoginPage> {
                             onTap: () async {
                               final credentials = await auth0
                                   .webAuthentication(scheme: "demo")
-                                  .login();
+                                  .login(audience: "http://localhost:8080");
 
                               final SharedPreferences prefs =
                                   await SharedPreferences.getInstance();

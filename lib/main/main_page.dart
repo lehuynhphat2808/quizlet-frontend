@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:ui';
 
 import 'package:animated_notch_bottom_bar/animated_notch_bottom_bar/animated_notch_bottom_bar.dart';
 import 'package:flutter/material.dart';
@@ -58,63 +59,80 @@ class _MainPageState extends State<MainPage> {
     Icons.person
   ];
 
+  final List<AppBar?> appBarList = [
+    AppBar(
+      title: const Text(
+        "Hone",
+        style: TextStyle(fontWeight: FontWeight.bold, fontFamily: 'Pacifico'),
+      ),
+      centerTitle: true,
+      elevation: 4,
+      shadowColor: Colors.grey,
+    ),
+    AppBar(
+      title: const Text(
+        "Topic",
+        style: TextStyle(fontWeight: FontWeight.bold, fontFamily: 'Pacifico'),
+      ),
+      centerTitle: true,
+      elevation: 4,
+      shadowColor: Colors.grey,
+    ),
+    null,
+    null
+  ];
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          topicString[_indexPage],
-          style: const TextStyle(
-              fontWeight: FontWeight.bold, fontFamily: 'Pacifico'),
+    double notchHeight = MediaQuery.of(context).padding.top;
+    print('notchHeight: $notchHeight');
+    final padding = MediaQuery.of(context).padding;
+    print('padding: $padding');
+
+    final appBarHeight = AppBar().preferredSize.height;
+    return Container(
+      padding: EdgeInsets.only(
+        top: appBarHeight,
+      ),
+      child: Scaffold(
+        appBar: appBarList[_indexPage],
+        floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+        floatingActionButton: FloatingActionButton(
+          backgroundColor: Colors.green,
+          shape: const CircleBorder(),
+          onPressed: () {
+            _showAddBottomPopup();
+          },
+          child: const Icon(Icons.add),
         ),
-        centerTitle: true,
-        elevation: 4,
-        shadowColor: Colors.grey,
-        actions: [
-          Padding(
-            padding: const EdgeInsets.only(right: 8.0),
-            child: actionList[_indexPage] != null
-                ? Icon(actionList[_indexPage])
-                : null,
-          )
-        ],
+        body: PageView(
+          controller: _pageController,
+          physics: const NeverScrollableScrollPhysics(),
+          children: List.generate(
+              bottomBarPages.length, (index) => bottomBarPages[index]),
+        ),
+        extendBody: true,
+        bottomNavigationBar: (bottomBarPages.length <= maxCount)
+            ? AnimatedBottomNavigationBar.builder(
+                height: 80,
+                tabBuilder: (int index, bool isActive) {
+                  return Icon(
+                    iconList[index],
+                    size: 24,
+                    color: isActive ? Colors.green : Colors.grey,
+                  );
+                },
+                activeIndex: _indexPage,
+                gapLocation: GapLocation.center,
+                notchSmoothness: NotchSmoothness.softEdge,
+                leftCornerRadius: 24,
+                rightCornerRadius: 24,
+                onTap: (index) => _changePage(index),
+                itemCount: iconList.length,
+                //other params
+              )
+            : null,
       ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-      floatingActionButton: FloatingActionButton(
-        backgroundColor: Colors.green,
-        shape: const CircleBorder(),
-        onPressed: () {
-          _showAddBottomPopup();
-        },
-        child: const Icon(Icons.add),
-      ),
-      body: PageView(
-        controller: _pageController,
-        physics: const NeverScrollableScrollPhysics(),
-        children: List.generate(
-            bottomBarPages.length, (index) => bottomBarPages[index]),
-      ),
-      extendBody: true,
-      bottomNavigationBar: (bottomBarPages.length <= maxCount)
-          ? AnimatedBottomNavigationBar.builder(
-              height: 80,
-              tabBuilder: (int index, bool isActive) {
-                return Icon(
-                  iconList[index],
-                  size: 24,
-                  color: isActive ? Colors.green : Colors.grey,
-                );
-              },
-              activeIndex: _indexPage,
-              gapLocation: GapLocation.center,
-              notchSmoothness: NotchSmoothness.softEdge,
-              leftCornerRadius: 24,
-              rightCornerRadius: 24,
-              onTap: (index) => _changePage(index),
-              itemCount: iconList.length,
-              //other params
-            )
-          : null,
     );
   }
 

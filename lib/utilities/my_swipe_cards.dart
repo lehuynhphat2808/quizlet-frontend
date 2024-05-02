@@ -125,7 +125,9 @@ class _SwipeCardsState extends State<SwipeCards> {
       _nextCardScale = 0.9 + (0.1 * (distance / 100.0)).clamp(0.0, 0.1);
     });
     if (distance > 5) {
-      widget.showBorder?.call();
+      widget.showBorder?.call(true);
+    } else {
+      widget.showBorder?.call(false);
     }
   }
 
@@ -140,6 +142,7 @@ class _SwipeCardsState extends State<SwipeCards> {
   }
 
   void _onSlideOutComplete(SlideDirection? direction) {
+    widget.showBorder?.call(false);
     SwipeItem? currentMatch = widget.matchEngine.currentItem;
     switch (direction) {
       case SlideDirection.left:

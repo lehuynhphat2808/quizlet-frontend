@@ -1,9 +1,9 @@
 import 'package:flip_card/flip_card.dart';
 import 'package:flutter/material.dart';
 import 'package:swipe_cards/draggable_card.dart';
-import 'package:swipe_cards/swipe_cards.dart';
 import 'package:linear_progress_bar/linear_progress_bar.dart';
 
+import '../utilities/my_swipe_cards.dart';
 import '../word/word_model.dart';
 
 class FlashCardPage extends StatefulWidget {

@@ -2,15 +2,16 @@ import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
 import 'package:quizlet_frontend/helper/helper.dart';
+import 'package:quizlet_frontend/leading_board_page/leading_board_model.dart';
 import 'package:quizlet_frontend/topic/topic_model.dart';
 import 'package:quizlet_frontend/utilities/page_response.dart';
 import 'package:http/http.dart' as http;
 import 'package:quizlet_frontend/word/word_model.dart';
 
 class ApiService {
-  // static String _token = "";
-  static String _token =
-'eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6IkY0U25PSlJsZUc2OVFkUHZCNzhocCJ9.eyJpc3MiOiJodHRwczovL3F1aXpsZXQuanAuYXV0aDAuY29tLyIsInN1YiI6Imdvb2dsZS1vYXV0aDJ8MTE0ODAxNDYxMDIxMTE0Mjk5MDY4IiwiYXVkIjpbImh0dHA6Ly9sb2NhbGhvc3Q6ODA4MCIsImh0dHBzOi8vcXVpemxldC5qcC5hdXRoMC5jb20vdXNlcmluZm8iXSwiaWF0IjoxNzEyNDc1MDI4LCJleHAiOjE3MTI1NjE0MjgsInNjb3BlIjoib3BlbmlkIHByb2ZpbGUgZW1haWwiLCJhenAiOiJmSkI5Tk5BUmQ3bTlqdUxGR2JDYTdybHBXcGcwd3V1biIsInBlcm1pc3Npb25zIjpbXX0.Nk3UiZzaZ0L56aJyigtR7Ub--noTlrFSfQhzDi8lZ5jKcCGz4XbwliMn2u9_4CuCuMt6qlkHl8UOnCss-kv4o0vnC-bhHgVV70hn6sB-oCg6Vp0-78tP3PKQo04igKad67Nk0prDhJH0R3kMfJplXw5OaQEZz4QdyjTo0Q6um2As_VEtHQD3KGRXIpaDioQAAr5qmx6NPTphkDbAXWGP64piOmv2wy3Bzk-C2dmEROR8yMMtr_VwkCMMk_gOYtigmAvivYQfJgTDwG5mspAGc_T3Xl3XNelwfhM40fjpHiykRkV3EeJGixhAPdPxe5uV61lwr5GljKzMDW5JJWQGyg';
+  static String _token = "";
+  // static String _token =
+  //     'eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6IkY0U25PSlJsZUc2OVFkUHZCNzhocCJ9.eyJpc3MiOiJodHRwczovL3F1aXpsZXQuanAuYXV0aDAuY29tLyIsInN1YiI6Imdvb2dsZS1vYXV0aDJ8MTE0ODAxNDYxMDIxMTE0Mjk5MDY4IiwiYXVkIjpbImh0dHA6Ly9sb2NhbGhvc3Q6ODA4MCIsImh0dHBzOi8vcXVpemxldC5qcC5hdXRoMC5jb20vdXNlcmluZm8iXSwiaWF0IjoxNzE0NjQzMzgxLCJleHAiOjE3MTQ3Mjk3ODEsInNjb3BlIjoib3BlbmlkIHByb2ZpbGUgZW1haWwiLCJhenAiOiJmSkI5Tk5BUmQ3bTlqdUxGR2JDYTdybHBXcGcwd3V1biIsInBlcm1pc3Npb25zIjpbXX0.WUxtfIM3pvBRgz3A6tGovYlZ3zbaoW4E-yxj1fory2DmswhTHoKiSFye-5IR7S5S0ybMqg3P8M2gG5D3wnmqrsBovwd6Mh0T-gFd5xvpgGFXPiCBaqmh8YGInwp6Sj7Cb-LpCyKMfc6fPZMr9-9-q2CCofmprrav4DeER2iUeruOP4WXCycCGtL_10cPGS26m3uu3CYxXk2w2I68A7nn7zObe7Qp5HYbdijKVXF2-gX-9KW9gLRyiMfnhouRw5IV0sRB4z-wX7A93Z0xpG_IOFZeT_3dYuujVCzRqUwJmf_sjg7cK0EjOWwi0yU2rheGkSqTEOrDzOYNnk_HC3p3LA';
   static set token(newToken) {
     _token = newToken;
   }
@@ -111,6 +112,27 @@ class ApiService {
     }
     if (kDebugMode) {
       print('Delete Topic: $wordId');
+    }
+  }
+
+  static Future<LeadingBoardModel> getLeadingBoard(String id) async {
+    var res = await http.get(Uri.parse('${baseUrl}leaderboard/$id'),
+        headers: headers);
+    if (res.statusCode == 200) {
+      Map<String, dynamic> response = jsonDecode(res.body);
+      print(response);
+      return LeadingBoardModel.fromJson(response);
+    } else {
+      throw Exception("getTopic fail ${res.statusCode}");
+    }
+  }
+
+  static Future<void> addScore(String topicId, int score) async {
+    var res = await http.post(Uri.parse('${baseUrl}user-scores'),
+        headers: headers,
+        body: jsonEncode({'topicId': topicId, 'score': score}));
+    if (res.statusCode != 200) {
+      throw Exception("addWord fail ${res.statusCode}");
     }
   }
 }

@@ -6,6 +6,7 @@ import 'package:quizlet_frontend/topic/topic_list_bloc/topic_list_bloc.dart';
 import 'package:quizlet_frontend/utilities/router_manager.dart';
 import 'package:quizlet_frontend/word/bloc/word_bloc.dart';
 import 'package:quizlet_frontend/login/login_page.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
   runApp(MultiBlocProvider(
@@ -22,7 +23,7 @@ void main() {
       ),
     ],
     child: const MaterialApp(
-      initialRoute: Routes.mainPage,
+      initialRoute: Routes.loginPage,
       onGenerateRoute: RouteGenerator.getRoute,
       debugShowCheckedModeBanner: false,
     ),

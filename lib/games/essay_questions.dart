@@ -38,8 +38,9 @@ class _EssayGameState extends State<EssayGame> {
             ),
           ),
           Container(
-              padding: const EdgeInsets.all(8),
+              padding: const EdgeInsets.only(left: 8, right: 8, bottom: 50),
               child: TextField(
+                decoration: const InputDecoration(hintText: "Your answer"),
                 controller: _textEditingController,
                 onSubmitted: (value) {
                   if (value == widget.currentWord.definition) {

@@ -1,5 +1,8 @@
+import 'dart:math';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:quizlet_frontend/topic/topic_cubit/topic_bloc.dart';
@@ -64,6 +67,9 @@ class _TopicPageState extends State<TopicPage> {
         if (state is TopicLoadedState) {
           topicModel = state.topic;
           print('TopicModel: ${topicModel!.words}');
+          topicModel?.public = true;
+          print('topic page topicModel: ${topicModel!.toJson()}');
+
           return SingleChildScrollView(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -99,7 +105,7 @@ class _TopicPageState extends State<TopicPage> {
                     children: <Widget>[
                       Text(
                         topicModel!.name!,
-                        style: TextStyle(
+                        style: const TextStyle(
                             fontWeight: FontWeight.bold,
                             fontSize: 24,
                             color: Colors.black87),
@@ -298,15 +304,59 @@ class _TopicPageState extends State<TopicPage> {
             ),
           ),
         ),
-        Card(
-          child: ListTile(
-            title: Text(
-              'Card pairing',
-              style: listTileTextStyle,
+        GestureDetector(
+          onTap: () {
+            List<WordModel> randomWordList = [];
+            Random random = Random();
+            int maxAnswer =
+                topicModel!.words!.length < 4 ? topicModel!.words!.length : 4;
+
+            while (randomWordList.length != maxAnswer) {
+              bool isExist = false;
+              print('randomWordList.length: ${randomWordList.length}');
+              var rd = random.nextInt(topicModel!.words!.length);
+              for (int i = 0; i < randomWordList.length; i++) {
+                if (randomWordList[i].id == topicModel!.words![rd].id) {
+                  isExist = true;
+                  break;
+                }
+              }
+              if (!isExist) {
+                randomWordList.add(topicModel!.words![rd]);
+              }
+            }
+            Navigator.pushNamed(context, Routes.cardPairing,
+                arguments: randomWordList);
+          },
+          child: Card(
+            child: ListTile(
+              title: Text(
+                'Card pairing',
+                style: listTileTextStyle,
+              ),
+              leading:
+                  Image.asset('assets/images/card_pairing.png', height: 20),
             ),
-            leading: Image.asset('assets/images/card_pairing.png', height: 20),
           ),
         ),
+        topicModel!.public!
+            ? GestureDetector(
+                onTap: () {
+                  Navigator.pushNamed(context, Routes.leadingBoadPage,
+                      arguments: topicModel!.id);
+                },
+                child: Card(
+                  child: ListTile(
+                    title: Text(
+                      'Leading Board',
+                      style: listTileTextStyle,
+                    ),
+                    leading: Image.asset('assets/images/leading_board_icon.png',
+                        height: 20),
+                  ),
+                ),
+              )
+            : SizedBox(),
       ],
     );
   }
