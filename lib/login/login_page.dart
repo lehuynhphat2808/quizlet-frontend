@@ -2,6 +2,7 @@ import 'package:animate_do/animate_do.dart';
 import 'package:auth0_flutter/auth0_flutter.dart';
 import 'package:flutter/material.dart';
 import 'package:quizlet_frontend/services/api_service.dart';
+import 'package:quizlet_frontend/services/auth0_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../utilities/router_manager.dart';
@@ -14,20 +15,22 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
-  late Auth0 auth0;
-
   @override
   void initState() {
     super.initState();
     Future.microtask(() async {
-      final SharedPreferences prefs = await SharedPreferences.getInstance();
-      final String? userToken = prefs.getString('userToken');
-      if (userToken != null && mounted) {
-        ApiService.token = userToken;
-        Navigator.pushReplacementNamed(context, Routes.mainPage);
+      Auth0 auth0 = Auth0Service.getAutho0();
+      print('init auth0');
+      if (await auth0.credentialsManager.hasValidCredentials()) {
+        Auth0Service.credentials = await auth0.credentialsManager.credentials();
+        print(
+            'Auth0Service.credentials: ${Auth0Service.credentials!.user.sub}');
+        print('token: ${Auth0Service.credentials!.accessToken}');
+        if (mounted) {
+          Navigator.pushReplacementNamed(context, Routes.mainPage);
+        }
       }
     });
-    auth0 = Auth0('quizlet.jp.auth0.com', 'PXPoy9JnUzaRrdk5EK0jKTjL9uBhSHxH');
   }
 
   @override
@@ -118,20 +121,7 @@ class _LoginPageState extends State<LoginPage> {
                           duration: const Duration(milliseconds: 1900),
                           child: InkWell(
                             onTap: () async {
-                              final credentials = await auth0
-                                  .webAuthentication(scheme: "demo")
-                                  .login(audience: "http://localhost:8080");
-
-                              final SharedPreferences prefs =
-                                  await SharedPreferences.getInstance();
-                              if (prefs.getString('userToken') == null) {
-                                prefs.setString(
-                                    'userToken', credentials.accessToken);
-                              } else {
-                                ApiService.token = credentials.accessToken;
-                                print('set token: ${credentials.accessToken}');
-                                print('ApiService.token: ${ApiService.token}');
-                              }
+                              await Auth0Service.login();
                               await goToMainPage();
                             },
                             child: Container(

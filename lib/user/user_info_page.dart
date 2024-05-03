@@ -1,6 +1,9 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
+import '../services/auth0_service.dart';
+import '../utilities/router_manager.dart';
+
 class UserInfoPage extends StatelessWidget {
   const UserInfoPage({super.key});
 
@@ -49,15 +52,15 @@ class UserInfoPage extends StatelessWidget {
                                 bottom: BorderSide(
                                     color:
                                         Color.fromRGBO(179, 179, 179, 1.0)))),
-                        child: const ListTile(
-                          title: Text(
+                        child: ListTile(
+                          title: const Text(
                             'Username',
                             style: TextStyle(fontWeight: FontWeight.bold),
                           ),
                           subtitle: Text(
-                            'lehuynhphat2808',
+                            '${Auth0Service.credentials!.user.nickname}',
                           ),
-                          trailing: Icon(Icons.navigate_next),
+                          trailing: const Icon(Icons.navigate_next),
                         ),
                       ),
                       Container(
@@ -67,15 +70,15 @@ class UserInfoPage extends StatelessWidget {
                                 bottom: BorderSide(
                                     color:
                                         Color.fromRGBO(179, 179, 179, 1.0)))),
-                        child: const ListTile(
-                          title: Text(
+                        child: ListTile(
+                          title: const Text(
                             'Email',
                             style: TextStyle(fontWeight: FontWeight.bold),
                           ),
                           subtitle: Text(
-                            'lehuynhphat2808@gmail.com',
+                            '${Auth0Service.credentials!.user.email}',
                           ),
-                          trailing: Icon(Icons.navigate_next),
+                          trailing: const Icon(Icons.navigate_next),
                         ),
                       ),
                       Container(
@@ -95,7 +98,7 @@ class UserInfoPage extends StatelessWidget {
                   height: 20,
                 ),
                 const Text(
-                  'User information',
+                  'Introduce',
                   style: TextStyle(
                       fontWeight: FontWeight.w500, color: Colors.grey),
                 ),
@@ -124,11 +127,8 @@ class UserInfoPage extends StatelessWidget {
                                         Color.fromRGBO(179, 179, 179, 1.0)))),
                         child: const ListTile(
                           title: Text(
-                            'Username',
+                            'Privacy',
                             style: TextStyle(fontWeight: FontWeight.bold),
-                          ),
-                          subtitle: Text(
-                            'lehuynhphat2808',
                           ),
                           trailing: Icon(Icons.navigate_next),
                         ),
@@ -142,11 +142,23 @@ class UserInfoPage extends StatelessWidget {
                                         Color.fromRGBO(179, 179, 179, 1.0)))),
                         child: const ListTile(
                           title: Text(
-                            'Email',
+                            'Terms of service',
                             style: TextStyle(fontWeight: FontWeight.bold),
                           ),
-                          subtitle: Text(
-                            'lehuynhphat2808@gmail.com',
+                          trailing: Icon(Icons.navigate_next),
+                        ),
+                      ),
+                      Container(
+                        padding: const EdgeInsets.all(8.0),
+                        decoration: const BoxDecoration(
+                            border: Border(
+                                bottom: BorderSide(
+                                    color:
+                                        Color.fromRGBO(179, 179, 179, 1.0)))),
+                        child: const ListTile(
+                          title: Text(
+                            'Open source license',
+                            style: TextStyle(fontWeight: FontWeight.bold),
                           ),
                           trailing: Icon(Icons.navigate_next),
                         ),
@@ -155,7 +167,7 @@ class UserInfoPage extends StatelessWidget {
                         padding: const EdgeInsets.all(8.0),
                         child: const ListTile(
                           title: Text(
-                            'Password',
+                            'Support center',
                             style: TextStyle(fontWeight: FontWeight.bold),
                           ),
                           trailing: Icon(Icons.navigate_next),
@@ -177,11 +189,17 @@ class UserInfoPage extends StatelessWidget {
                           borderRadius: BorderRadius.circular(5),
                         ),
                       ),
-                      onPressed: () {},
+                      onPressed: () async {
+                        await Auth0Service.logout();
+                        Navigator.pushNamedAndRemoveUntil(
+                            context, Routes.loginPage, (route) => false);
+                      },
                       child: const Text(
                         'Log out',
                         style: TextStyle(
-                            color: Colors.grey, fontWeight: FontWeight.bold),
+                            color: Colors.grey,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16),
                       )),
                 ),
                 const SizedBox(
@@ -201,7 +219,9 @@ class UserInfoPage extends StatelessWidget {
                       child: const Text(
                         'Delete account',
                         style: TextStyle(
-                            color: Colors.grey, fontWeight: FontWeight.bold),
+                            color: Colors.grey,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16),
                       )),
                 ),
               ],

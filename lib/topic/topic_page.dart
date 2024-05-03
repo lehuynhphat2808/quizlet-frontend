@@ -1,10 +1,12 @@
 import 'dart:math';
 
+import 'package:auth0_flutter/auth0_flutter.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
+import 'package:quizlet_frontend/services/api_service.dart';
 import 'package:quizlet_frontend/topic/topic_cubit/topic_bloc.dart';
 import 'package:quizlet_frontend/topic/topic_cubit/topic_state.dart';
 import 'package:quizlet_frontend/topic/topic_model.dart';
@@ -13,6 +15,8 @@ import 'package:quizlet_frontend/utilities/router_manager.dart';
 import 'package:quizlet_frontend/word/word_model.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+
+import '../services/auth0_service.dart';
 
 class TopicPage extends StatefulWidget {
   final String TOPIC_ID;
@@ -25,6 +29,7 @@ class TopicPage extends StatefulWidget {
 class _TopicPageState extends State<TopicPage> {
   bool defaultOrder = true;
   TopicModel? topicModel;
+  Credentials? credentials;
   final TextStyle listTileTextStyle =
       const TextStyle(fontWeight: FontWeight.w500, fontSize: 16);
   final pageController = PageController(viewportFraction: 0.85);
@@ -66,9 +71,7 @@ class _TopicPageState extends State<TopicPage> {
       builder: (BuildContext context, state) {
         if (state is TopicLoadedState) {
           topicModel = state.topic;
-          print('TopicModel: ${topicModel!.words}');
           topicModel?.public = true;
-          print('topic page topicModel: ${topicModel!.toJson()}');
 
           return SingleChildScrollView(
             child: Column(
@@ -112,16 +115,17 @@ class _TopicPageState extends State<TopicPage> {
                       ),
                       Row(
                         children: [
-                          const CircleAvatar(
-                            backgroundImage: NetworkImage(
-                                'https://vtv1.mediacdn.vn/zoom/628_280/562122370168008704/2023/6/14/photo1686714465501-16867144656101728954756.png'),
+                          CircleAvatar(
+                            backgroundImage: NetworkImage(Auth0Service
+                                .credentials!.user.pictureUrl
+                                .toString()),
                           ),
                           const SizedBox(
                             width: 8,
                           ),
-                          const Text(
-                            'lehuynhphat2808',
-                            style: TextStyle(
+                          Text(
+                            '${Auth0Service.credentials!.user.nickname}',
+                            style: const TextStyle(
                                 fontWeight: FontWeight.w500,
                                 color: Colors.black87),
                           ),

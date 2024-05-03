@@ -26,7 +26,6 @@ class _TopicListPageState extends State<TopicListPage> {
 
   @override
   Widget build(BuildContext context) {
-    print('Api token: ${ApiService.token}');
     return _buildListTopic;
   }
 

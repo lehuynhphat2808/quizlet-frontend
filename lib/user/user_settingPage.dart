@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:quizlet_frontend/services/auth0_service.dart';
 import 'package:quizlet_frontend/user/user_info_page.dart';
 
 class UserSettingPage extends StatelessWidget {
@@ -10,14 +11,14 @@ class UserSettingPage extends StatelessWidget {
       padding: const EdgeInsets.only(left: 8, right: 8, top: 20),
       child: Column(
         children: [
-          const CircleAvatar(
+          CircleAvatar(
             radius: 50,
             backgroundImage: NetworkImage(
-                'https://vtv1.mediacdn.vn/zoom/640_400/562122370168008704/2023/6/14/photo1686714465501-16867144656101728954756.png'),
+                Auth0Service.credentials!.user.pictureUrl.toString()),
           ),
-          const Text(
-            'This is username',
-            style: TextStyle(
+          Text(
+            '${Auth0Service.credentials!.user.nickname}',
+            style: const TextStyle(
               fontWeight: FontWeight.bold,
               fontSize: 20,
             ),
