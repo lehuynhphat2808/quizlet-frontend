@@ -1,11 +1,16 @@
+import 'dart:io';
 import 'dart:math';
 
 import 'package:auth0_flutter/auth0_flutter.dart';
+import 'package:csv/csv.dart';
+import 'package:external_path/external_path.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_tts/flutter_tts.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:quizlet_frontend/services/api_service.dart';
 import 'package:quizlet_frontend/topic/topic_cubit/topic_bloc.dart';
 import 'package:quizlet_frontend/topic/topic_cubit/topic_state.dart';
@@ -27,6 +32,8 @@ class TopicPage extends StatefulWidget {
 }
 
 class _TopicPageState extends State<TopicPage> {
+  late FlutterTts flutterTts;
+
   bool defaultOrder = true;
   TopicModel? topicModel;
   Credentials? credentials;
@@ -38,6 +45,7 @@ class _TopicPageState extends State<TopicPage> {
   void initState() {
     context.read<TopicCubit>().getTopic(widget.TOPIC_ID);
     super.initState();
+    flutterTts = FlutterTts();
   }
 
   @override
@@ -49,9 +57,39 @@ class _TopicPageState extends State<TopicPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(actions: [
-        const Padding(
+        Padding(
           padding: EdgeInsets.all(8.0),
-          child: Icon(CupertinoIcons.share),
+          child: IconButton(
+              onPressed: () async {
+                await showDialog(
+                  context: context,
+                  builder: (context) => AlertDialog(
+                    title: const Text('Do you want export csv file'),
+                    actions: <Widget>[
+                      TextButton(
+                        style: TextButton.styleFrom(
+                          textStyle: Theme.of(context).textTheme.labelLarge,
+                        ),
+                        child: const Text('No'),
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                        },
+                      ),
+                      TextButton(
+                        style: TextButton.styleFrom(
+                          textStyle: Theme.of(context).textTheme.labelLarge,
+                        ),
+                        child: const Text('Yes'),
+                        onPressed: () async {
+                          await _exportCsv();
+                          Navigator.of(context).pop();
+                        },
+                      ),
+                    ],
+                  ),
+                );
+              },
+              icon: Icon(CupertinoIcons.share)),
         ),
         Padding(
           padding: const EdgeInsets.only(right: 16, left: 8, top: 8, bottom: 8),
@@ -380,9 +418,14 @@ class _TopicPageState extends State<TopicPage> {
                   '${wordModel.name}',
                   style: const TextStyle(fontSize: 20),
                 ),
-                const Row(
+                Row(
                   children: [
-                    Icon(Icons.volume_up),
+                    IconButton(
+                      onPressed: () {
+                        _speak(wordModel.name);
+                      },
+                      icon: Icon(Icons.volume_up),
+                    ),
                     Icon(Icons.star_outline_sharp)
                   ],
                 )
@@ -538,5 +581,53 @@ class _TopicPageState extends State<TopicPage> {
         ),
       ],
     );
+  }
+
+  Future<void> _exportCsv() async {
+    Map<Permission, PermissionStatus> statuses = await [
+      Permission.storage,
+    ].request();
+
+    List<dynamic> associateList = [];
+    for (WordModel wordModel in topicModel!.words!) {
+      associateList
+          .add({'Word': wordModel.name, "Definition": wordModel.definition});
+    }
+
+    List<List<dynamic>> rows = [];
+
+    List<dynamic> row = [];
+    row.add("Word");
+    row.add("Definition");
+    rows.add(row);
+    for (int i = 0; i < associateList.length; i++) {
+      List<dynamic> row = [];
+      row.add(associateList[i]["Word"]);
+      row.add(associateList[i]["Definition"]);
+      rows.add(row);
+    }
+
+    String csv = const ListToCsvConverter().convert(rows);
+
+    String dir = await ExternalPath.getExternalStoragePublicDirectory(
+        ExternalPath.DIRECTORY_DOWNLOADS);
+    print("dir $dir");
+    String file = "$dir";
+
+    File f = File("$file/${topicModel!.name}.csv");
+
+    f.writeAsString(csv);
+  }
+
+  Future<void> _speak(String? newVoiceText) async {
+    await flutterTts.setVolume(1.0);
+    await flutterTts.setSpeechRate(0.5);
+    await flutterTts.setPitch(1.0);
+
+    if (newVoiceText != null) {
+      if (newVoiceText.isNotEmpty) {
+        await flutterTts.speak(newVoiceText);
+      }
+    }
   }
 }

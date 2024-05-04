@@ -1,0 +1,2 @@
+VHOST: /
+QUEUE: q.websocket-leaderboard-change-event

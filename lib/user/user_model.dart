@@ -12,21 +12,24 @@ class UserModel {
   String id;
   String nickname;
   String avatar;
-  int score;
-  int rank;
+  String? email;
+  int? score;
+  int? rank;
 
   UserModel({
     required this.id,
     required this.nickname,
     required this.avatar,
-    required this.score,
-    required this.rank,
+    this.score,
+    this.rank,
+    this.email,
   });
 
   UserModel copyWith({
     String? id,
     String? nickname,
     String? avatar,
+    String? email,
     int? score,
     int? rank,
   }) =>
@@ -36,6 +39,7 @@ class UserModel {
         avatar: avatar ?? this.avatar,
         score: score ?? this.score,
         rank: rank ?? this.rank,
+        email: email ?? this.email,
       );
 
   factory UserModel.fromJson(Map<String, dynamic> json) => UserModel(
@@ -44,6 +48,7 @@ class UserModel {
         avatar: json["avatar"],
         score: json["score"],
         rank: json["rank"],
+        email: json["email"],
       );
 
   Map<String, dynamic> toJson() => {
@@ -52,5 +57,6 @@ class UserModel {
         "avatar": avatar,
         "score": score,
         "rank": rank,
+        "email": email,
       };
 }

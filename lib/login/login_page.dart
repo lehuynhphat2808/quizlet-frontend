@@ -26,7 +26,8 @@ class _LoginPageState extends State<LoginPage> {
         print(
             'Auth0Service.credentials: ${Auth0Service.credentials!.user.sub}');
         print('token: ${Auth0Service.credentials!.accessToken}');
-        if (mounted) {
+        await ApiService.getProfile();
+        if (context.mounted) {
           Navigator.pushReplacementNamed(context, Routes.mainPage);
         }
       }
@@ -122,7 +123,11 @@ class _LoginPageState extends State<LoginPage> {
                           child: InkWell(
                             onTap: () async {
                               await Auth0Service.login();
-                              await goToMainPage();
+                              await ApiService.getProfile();
+                              if (context.mounted) {
+                                Navigator.pushReplacementNamed(
+                                    context, Routes.mainPage);
+                              }
                             },
                             child: Container(
                               height: 50,
@@ -159,9 +164,5 @@ class _LoginPageState extends State<LoginPage> {
         ),
       ),
     );
-  }
-
-  Future<void> goToMainPage() async {
-    Navigator.pushReplacementNamed(context, Routes.mainPage);
   }
 }

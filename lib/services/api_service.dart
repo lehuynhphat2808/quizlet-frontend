@@ -6,11 +6,14 @@ import 'package:quizlet_frontend/helper/helper.dart';
 import 'package:quizlet_frontend/leading_board_page/leading_board_model.dart';
 import 'package:quizlet_frontend/services/auth0_service.dart';
 import 'package:quizlet_frontend/topic/topic_model.dart';
+import 'package:quizlet_frontend/user/user_model.dart';
+import 'package:quizlet_frontend/utilities/error_response.dart';
 import 'package:quizlet_frontend/utilities/page_response.dart';
 import 'package:http/http.dart' as http;
 import 'package:quizlet_frontend/word/word_model.dart';
 
 class ApiService {
+  static late UserModel userModel;
   static String baseUrl = 'http://10.0.2.2:8080/api/v1/';
   static Map<String, String> get headers => {
         "Content-Type": "application/json",
@@ -126,6 +129,28 @@ class ApiService {
         body: jsonEncode({'topicId': topicId, 'score': score}));
     if (res.statusCode != 200) {
       throw Exception("addWord fail ${res.statusCode}");
+    }
+  }
+
+  static Future<void> updatePassword(String password) async {
+    var res = await http.put(Uri.parse('${baseUrl}users/password'),
+        headers: headers, body: jsonEncode({'password': password}));
+    if (res.statusCode != 200) {
+      ErrorResponse errorResponse =
+          ErrorResponse.fromJson(jsonDecode(res.body));
+      throw Exception("Update Password fail: ${errorResponse.message}");
+    }
+  }
+
+  static Future<void> getProfile() async {
+    var res =
+        await http.get(Uri.parse('${baseUrl}users/profile'), headers: headers);
+    if (res.statusCode == 200) {
+      Map<String, dynamic> response = jsonDecode(res.body);
+      print(response);
+      userModel = UserModel.fromJson(response);
+    } else {
+      throw Exception("getTopic fail ${res.statusCode}");
     }
   }
 }

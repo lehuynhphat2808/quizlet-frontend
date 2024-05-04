@@ -1,5 +1,9 @@
 import 'dart:async';
+import 'dart:convert';
+import 'dart:io';
 
+import 'package:csv/csv.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:quizlet_frontend/topic/topic_cubit/topic_bloc.dart';
@@ -21,6 +25,9 @@ class AddPage extends StatefulWidget {
 }
 
 class _AddTopicPageState extends State<AddPage> {
+  List<List<dynamic>> _data = [];
+  String? filePath;
+
   final List<WordModel> wordModelList = [];
 
   int itemWordCount = 2;
@@ -195,6 +202,17 @@ class _AddTopicPageState extends State<AddPage> {
                           child: _buildItemWord(index));
                     }),
               ),
+              if (widget.topicModel == null)
+                Container(
+                  width: double.maxFinite,
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  child: ElevatedButton(
+                    onPressed: () {
+                      _pickFile();
+                    },
+                    child: const Text('Import CSV'),
+                  ),
+                ),
               Container(
                 width: double.maxFinite,
                 padding: const EdgeInsets.symmetric(vertical: 16),
@@ -275,5 +293,55 @@ class _AddTopicPageState extends State<AddPage> {
         ],
       ),
     );
+  }
+
+  void _inportCsv() async {
+    final input =
+        File('C:\\HK6\\flutter\\CuoiKi\\quizlet_frontend\\lib\\csv\\mycsv.csv')
+            .openRead();
+    final fields = await input
+        .transform(utf8.decoder)
+        .transform(const CsvToListConverter())
+        .toList();
+    print('fields: ${fields}');
+    for (int i = 1; i < fields.length; i++) {
+      for (int j = 0; j < fields[i].length; j++) {}
+    }
+  }
+
+  void _pickFile() async {
+    setState(() {
+      wordModelList.clear();
+    });
+    final result = await FilePicker.platform.pickFiles(allowMultiple: false);
+
+    // if no file is picked
+    if (result == null) return;
+    // we will log the name, size and path of the
+    // first picked file (if multiple are selected)
+    print(result.files.first.name);
+    filePath = result.files.first.path!;
+
+    final input = File(filePath!).openRead();
+    final fields = await input
+        .transform(utf8.decoder)
+        .transform(const CsvToListConverter())
+        .toList();
+    print(fields);
+    if (fields[0][0] == 'Word' && fields[0][1] == 'Definition') {
+      print('length: ${wordModelList.length}');
+
+      for (int i = 1; i < fields.length; i++) {
+        wordModelList.add(WordModel());
+
+        setState(() {
+          wordModelList[wordModelList.length - 1].name = fields[i][0];
+          wordModelList[wordModelList.length - 1].definition = fields[i][1];
+        });
+
+        print('field: ${fields[i]}');
+        print('wordModelList: ${wordModelList[i - 1].name}');
+      }
+    }
   }
 }
