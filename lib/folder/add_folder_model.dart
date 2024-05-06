@@ -1,24 +1,24 @@
 // To parse this JSON data, do
 //
-//     final addTopicModel = addTopicModelFromJson(jsonString);
+//     final addFolderModel = addFolderModelFromJson(jsonString);
 
 import 'dart:convert';
 
-AddTopicModel addTopicModelFromJson(String str) =>
-    AddTopicModel.fromJson(json.decode(str));
+AddFolderModel addFolderModelFromJson(String str) =>
+    AddFolderModel.fromJson(json.decode(str));
 
-String addTopicModelToJson(AddTopicModel data) => json.encode(data.toJson());
+String addFolderModelToJson(AddFolderModel data) => json.encode(data.toJson());
 
-class AddTopicModel {
-  String name;
+class AddFolderModel {
+  String? name;
   List<String> topicIds;
 
-  AddTopicModel({
-    required this.name,
-    required this.topicIds,
-  });
+  AddFolderModel({
+    this.name,
+    topicIds,
+  }) : topicIds = topicIds ?? [];
 
-  factory AddTopicModel.fromJson(Map<String, dynamic> json) => AddTopicModel(
+  factory AddFolderModel.fromJson(Map<String, dynamic> json) => AddFolderModel(
         name: json["name"],
         topicIds: List<String>.from(json["topicIds"].map((x) => x)),
       );

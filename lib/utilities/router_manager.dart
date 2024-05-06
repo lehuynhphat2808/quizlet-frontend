@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:quizlet_frontend/folder/folder_detail_page.dart';
+import 'package:quizlet_frontend/folder/folder_model.dart';
+import 'package:quizlet_frontend/folder/update_folder_page.dart';
 import 'package:quizlet_frontend/games/card_pairing_game.dart';
 import 'package:quizlet_frontend/games/learning_page.dart';
 import 'package:quizlet_frontend/games/test_page.dart';
+import 'package:quizlet_frontend/games/typing_page.dart';
 import 'package:quizlet_frontend/leading_board_page/leading_board_page.dart';
 import 'package:quizlet_frontend/login/login_page.dart';
 import 'package:quizlet_frontend/topic/topic_model.dart';
@@ -16,10 +20,13 @@ class Routes {
   static const String mainPage = "/";
   static const String leadingBoadPage = "/leadingBoad";
   static const String updateTopicPage = "/updateTopicPage";
+  static const String updateFolderPage = "/updateFolderPage";
   static const String topicPage = "/topic";
+  static const String folderDetailPage = "/folderDetailPage";
   static const String flashCardPage = '/flashCard';
   static const String learningPage = '/learningPage';
   static const String testPage = '/testPage';
+  static const String typingPage = '/typingPage';
   static const String cardPairing = '/cardPairing';
 }
 
@@ -29,7 +36,6 @@ class RouteGenerator {
       case Routes.loginPage:
         return MaterialPageRoute(
             settings: routeSettings, builder: (context) => const LoginPage());
-
       case Routes.mainPage:
         return MaterialPageRoute(
             settings: routeSettings, builder: (context) => const MainPage());
@@ -47,11 +53,25 @@ class RouteGenerator {
                       ? null
                       : routeSettings.arguments as TopicModel,
                 ));
+      case Routes.updateFolderPage:
+        return MaterialPageRoute(
+            settings: routeSettings,
+            builder: (context) => AddFolderPage(
+                  folderModel: routeSettings.arguments == null
+                      ? null
+                      : routeSettings.arguments as FolderModel,
+                ));
       case Routes.topicPage:
         return MaterialPageRoute(
             settings: routeSettings,
             builder: (context) => TopicPage(
                   TOPIC_ID: routeSettings.arguments.toString(),
+                ));
+      case Routes.folderDetailPage:
+        return MaterialPageRoute(
+            settings: routeSettings,
+            builder: (context) => FolderDetailPage(
+                  id: routeSettings.arguments.toString(),
                 ));
       case Routes.flashCardPage:
         return MaterialPageRoute(
@@ -69,6 +89,12 @@ class RouteGenerator {
         return MaterialPageRoute(
             settings: routeSettings,
             builder: (context) => TestPage(
+                  wordModels: routeSettings.arguments as List<WordModel>,
+                ));
+      case Routes.typingPage:
+        return MaterialPageRoute(
+            settings: routeSettings,
+            builder: (context) => TypingPage(
                   wordModels: routeSettings.arguments as List<WordModel>,
                 ));
       case Routes.cardPairing:

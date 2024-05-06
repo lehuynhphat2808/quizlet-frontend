@@ -17,6 +17,8 @@ class LoginPage extends StatefulWidget {
 class _LoginPageState extends State<LoginPage> {
   @override
   void initState() {
+    print('initState');
+
     super.initState();
     Future.microtask(() async {
       Auth0 auth0 = Auth0Service.getAutho0();
@@ -27,8 +29,12 @@ class _LoginPageState extends State<LoginPage> {
             'Auth0Service.credentials: ${Auth0Service.credentials!.user.sub}');
         print('token: ${Auth0Service.credentials!.accessToken}');
         await ApiService.getProfile();
-        if (context.mounted) {
-          Navigator.pushReplacementNamed(context, Routes.mainPage);
+        if (mounted) {
+          Navigator.pushNamedAndRemoveUntil(
+            context,
+            Routes.mainPage,
+            (route) => false,
+          );
         }
       }
     });
@@ -122,12 +128,14 @@ class _LoginPageState extends State<LoginPage> {
                           duration: const Duration(milliseconds: 1900),
                           child: InkWell(
                             onTap: () async {
+                              print('click login');
+
                               await Auth0Service.login();
                               await ApiService.getProfile();
-                              if (context.mounted) {
-                                Navigator.pushReplacementNamed(
-                                    context, Routes.mainPage);
-                              }
+                              print(
+                                  'profile: ${ApiService.userModel.toJson()}');
+                              Navigator.pushReplacementNamed(
+                                  context, Routes.mainPage);
                             },
                             child: Container(
                               height: 50,

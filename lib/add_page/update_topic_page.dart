@@ -6,6 +6,7 @@ import 'package:csv/csv.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:quizlet_frontend/topic/topic_cubit/topic_bloc.dart';
 import 'package:quizlet_frontend/topic/topic_model.dart';
 import 'package:quizlet_frontend/utilities/router_manager.dart';
@@ -25,7 +26,6 @@ class AddPage extends StatefulWidget {
 }
 
 class _AddTopicPageState extends State<AddPage> {
-  List<List<dynamic>> _data = [];
   String? filePath;
 
   final List<WordModel> wordModelList = [];
@@ -36,6 +36,8 @@ class _AddTopicPageState extends State<AddPage> {
   late String TOPIC_ID;
   late StreamSubscription _subscription;
   late TopicListBloc topicBloc;
+  bool public = false;
+  String? dropDownValue = 'Private';
 
   @override
   void initState() {
@@ -46,6 +48,11 @@ class _AddTopicPageState extends State<AddPage> {
         for (WordModel wordModel in widget.topicModel!.words!) {
           wordModelList.add(wordModel);
         }
+      }
+      print('widget.topicModel: ${widget.topicModel!.toJson()}');
+      if (widget.topicModel!.public!) {
+        public = true;
+        dropDownValue = 'Public';
       }
     } else {
       wordModelList.add(WordModel());
@@ -77,6 +84,7 @@ class _AddTopicPageState extends State<AddPage> {
       floatingActionButton: Container(
         margin: const EdgeInsets.only(bottom: 50),
         child: FloatingActionButton(
+          backgroundColor: Colors.black,
           onPressed: () {
             wordModelList.add(WordModel());
 
@@ -84,15 +92,37 @@ class _AddTopicPageState extends State<AddPage> {
               itemWordCount++;
             });
           },
-          child: const Icon(Icons.add),
+          child: const Icon(
+            Icons.add,
+            color: Colors.white,
+          ),
         ),
       ),
       appBar: AppBar(
         centerTitle: true,
         title: Text(
           widget.topicModel == null ? "Create Topic" : "Update Topic",
-          style: const TextStyle(fontWeight: FontWeight.bold),
+          style: const TextStyle(
+              fontWeight: FontWeight.bold, fontFamily: "Pacifico"),
         ),
+        actions: [
+          if (widget.topicModel == null)
+            IconButton(
+                onPressed: () {
+                  _pickFile();
+                },
+                icon: const Icon(FontAwesomeIcons.fileCsv)),
+          IconButton(
+              onPressed: () {
+                if (_formKey.currentState!.validate()) {
+                  _formKey.currentState!.save();
+                }
+              },
+              icon: const Icon(
+                Icons.done,
+                size: 32,
+              )),
+        ],
       ),
       body: Form(
         key: _formKey,
@@ -117,7 +147,8 @@ class _AddTopicPageState extends State<AddPage> {
                   if (widget.topicModel == null) {
                     context.read<TopicListBloc>().add(
                           TopicInsertedEvent(
-                            topicInfo: TopicModel(name: newValue, public: true),
+                            topicInfo:
+                                TopicModel(name: newValue, public: public),
                           ),
                         );
                   } else {
@@ -127,7 +158,7 @@ class _AddTopicPageState extends State<AddPage> {
                       wordModel.topicId = widget.topicModel!.id;
                     }
                     newTopic.words = wordModelList;
-                    newTopic.public = widget.topicModel!.public;
+                    newTopic.public = public;
                     context
                         .read<TopicCubit>()
                         .updateTopic(widget.topicModel!, newTopic);
@@ -143,6 +174,31 @@ class _AddTopicPageState extends State<AddPage> {
                 'Topic',
                 style: TextStyle(fontSize: 8, fontWeight: FontWeight.bold),
               ),
+              Container(
+                padding: EdgeInsets.symmetric(horizontal: 16),
+                height: 100,
+                width: double.maxFinite,
+                child: DropdownButtonFormField(
+                  value: dropDownValue, // this
+                  items: ["Private", "Public"]
+                      .map<DropdownMenuItem<String>>((String _value) =>
+                          DropdownMenuItem<String>(
+                              value:
+                                  _value, // add this property an pass the _value to it
+                              child: Text(
+                                _value,
+                              )))
+                      .toList(),
+                  onChanged: (value) {
+                    if (value == 'Public') {
+                      public = true;
+                    } else {
+                      public = false;
+                    }
+                    print("public: $public");
+                  },
+                ),
+              ),
               const SizedBox(
                 height: 20,
               ),
@@ -154,7 +210,9 @@ class _AddTopicPageState extends State<AddPage> {
                       return Dismissible(
                           direction: DismissDirection.endToStart,
                           onDismissed: (direction) {
-                            wordModelList.removeAt(index);
+                            setState(() {
+                              wordModelList.removeAt(index);
+                            });
                           },
                           confirmDismiss: (direction) async {
                             return await showDialog(
@@ -178,7 +236,7 @@ class _AddTopicPageState extends State<AddPage> {
                                           Navigator.of(context).pop(false),
                                       child: const Text(
                                         "CANCEL",
-                                        style: TextStyle(color: Colors.green),
+                                        style: TextStyle(color: Colors.grey),
                                       ),
                                     ),
                                   ],
@@ -198,35 +256,9 @@ class _AddTopicPageState extends State<AddPage> {
                               ),
                             ),
                           ),
-                          key: Key('Key$index'),
+                          key: UniqueKey(),
                           child: _buildItemWord(index));
                     }),
-              ),
-              if (widget.topicModel == null)
-                Container(
-                  width: double.maxFinite,
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  child: ElevatedButton(
-                    onPressed: () {
-                      _pickFile();
-                    },
-                    child: const Text('Import CSV'),
-                  ),
-                ),
-              Container(
-                width: double.maxFinite,
-                padding: const EdgeInsets.symmetric(vertical: 16),
-                child: ElevatedButton(
-                  onPressed: () {
-                    if (_formKey.currentState!.validate()) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Processing Data')),
-                      );
-                      _formKey.currentState!.save();
-                    }
-                  },
-                  child: const Text('Submit'),
-                ),
               ),
             ],
           ),
@@ -293,20 +325,6 @@ class _AddTopicPageState extends State<AddPage> {
         ],
       ),
     );
-  }
-
-  void _inportCsv() async {
-    final input =
-        File('C:\\HK6\\flutter\\CuoiKi\\quizlet_frontend\\lib\\csv\\mycsv.csv')
-            .openRead();
-    final fields = await input
-        .transform(utf8.decoder)
-        .transform(const CsvToListConverter())
-        .toList();
-    print('fields: ${fields}');
-    for (int i = 1; i < fields.length; i++) {
-      for (int j = 0; j < fields[i].length; j++) {}
-    }
   }
 
   void _pickFile() async {

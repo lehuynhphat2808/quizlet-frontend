@@ -1,5 +1,6 @@
 import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:flutter/material.dart';
+import 'package:quizlet_frontend/utilities/tts_uti.dart';
 import 'package:quizlet_frontend/word/word_model.dart';
 
 class MultipleChoiceGame extends StatefulWidget {
@@ -27,12 +28,32 @@ class _MultipleChoiceGameState extends State<MultipleChoiceGame> {
       child: Column(
         children: [
           Expanded(
-            child: Container(
-              alignment: Alignment.center,
-              child: Text(
-                widget.currentWord.name!,
-                style: const TextStyle(fontSize: 32),
-              ),
+            child: Stack(
+              children: [
+                Align(
+                  alignment: Alignment.topRight,
+                  child: Padding(
+                    padding: const EdgeInsets.all(10),
+                    child: IconButton(
+                      icon: const Icon(
+                        Icons.volume_up,
+                        color: Colors.grey,
+                        size: 25,
+                      ),
+                      onPressed: () async {
+                        await speak(widget.currentWord.name!);
+                      },
+                    ),
+                  ),
+                ),
+                Container(
+                  alignment: Alignment.center,
+                  child: Text(
+                    widget.currentWord.name!,
+                    style: const TextStyle(fontSize: 32),
+                  ),
+                ),
+              ],
             ),
           ),
           ListView.builder(

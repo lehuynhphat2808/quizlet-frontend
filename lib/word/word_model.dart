@@ -26,8 +26,6 @@ class WordModel {
   static List<WordModel> getWordModelList(List<dynamic> dynamicList) {
     wordModelList = [];
     for (Map<String, dynamic> i in dynamicList) {
-      print('getWordModelList $i');
-
       wordModelList.add(WordModel.fromJson(i));
     }
     return wordModelList;

@@ -96,12 +96,14 @@ class _LeadingBoardPageState extends State<LeadingBoardPage> {
           } else if (snapshot.hasError) {
             print(snapshot.error);
             return Container(
-              height: 200,
-              width: 200,
-              color: Colors.red,
+              decoration: const BoxDecoration(
+                  image: DecorationImage(
+                      image: AssetImage(
+                          'assets/images/background_leading_board.jpg'),
+                      fit: BoxFit.cover)),
             );
           } else {
-            return CircularProgressIndicator();
+            return const CircularProgressIndicator();
           }
         },
       ),

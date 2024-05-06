@@ -182,6 +182,9 @@ class _EssayGameState extends State<EssayGame> {
       btnOkText: "Continue",
       btnOkOnPress: () {
         widget.handleOnOkClick!.call();
+        setState(() {
+          _textEditingController.text = '';
+        });
       },
     ).show();
   }

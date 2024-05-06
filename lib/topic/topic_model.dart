@@ -1,3 +1,4 @@
+import 'package:quizlet_frontend/user/user_model.dart';
 import 'package:quizlet_frontend/word/word_model.dart';
 
 class TopicModel {
@@ -6,6 +7,7 @@ class TopicModel {
   int? wordCount;
   bool? public;
   String url;
+  UserModel? owner;
   List<WordModel>? words;
 
   TopicModel(
@@ -14,13 +16,17 @@ class TopicModel {
       this.wordCount,
       this.url = 'string',
       this.public,
-      this.words});
+      this.words,
+      this.owner});
 
   static List<TopicModel> getTopicModelList(List<dynamic> dynamicList) {
+    print('XXXXXXXXXXXXXXXXXXXXXXXXXXXXX');
+    print('dynamicList: $dynamicList');
     List<TopicModel> topicModelList = [];
     for (Map<String, dynamic> i in dynamicList) {
       topicModelList.add(TopicModel.fromJson(i));
     }
+    print('topicModelList: $topicModelList');
     return topicModelList;
   }
 
@@ -33,6 +39,7 @@ class TopicModel {
         words: json["words"] == null
             ? null
             : WordModel.getWordModelList(json["words"]),
+        owner: json['owner'] == null ? null : UserModel.fromJson(json['owner']),
       );
 
   Map<String, dynamic> toJson() => {
@@ -42,6 +49,7 @@ class TopicModel {
         "wordCount": wordCount,
         "public": public,
         "words": words,
+        "owner": owner,
       };
 
   bool isSameInformation(TopicModel newTopic) {
