@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:ui';
 
 import 'package:animated_notch_bottom_bar/animated_notch_bottom_bar/animated_notch_bottom_bar.dart';
+import 'package:easy_search_bar/easy_search_bar.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:quizlet_frontend/folder/folder_page.dart';
@@ -62,11 +63,15 @@ class _MainPageState extends State<MainPage> {
     Icons.person
   ];
 
-  final List<AppBar?> appBarList = [
+  final List<PreferredSizeWidget?> appBarList = [
     AppBar(
-      title: const Text(
-        "Hone",
-        style: TextStyle(fontWeight: FontWeight.bold, fontFamily: 'Pacifico'),
+      title: EasySearchBar(
+        backgroundColor: Colors.white,
+        title: const Text(
+          "Hone",
+          style: TextStyle(fontWeight: FontWeight.bold, fontFamily: 'Pacifico'),
+        ),
+        onSearch: (String) {},
       ),
       centerTitle: true,
       elevation: 4,
@@ -242,7 +247,7 @@ class _MainPageState extends State<MainPage> {
                         Navigator.pop(context);
                         await Navigator.pushNamed(
                             context, Routes.updateFolderPage);
-                        folderPageKey.currentState!.reset();
+                        folderPageKey.currentState?.reset();
                       },
                     ),
                   ),

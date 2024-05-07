@@ -58,6 +58,9 @@ dependencies:
   external_path: ^1.0.3
   permission_handler: ^11.3.1
   flutter_tts: ^4.0.2
+  web_socket_channel: ^2.0.0
+  stomp_dart_client: ^2.0.0
+  easy_search_bar: ^2.5.0
 
 
 

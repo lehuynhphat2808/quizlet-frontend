@@ -13,6 +13,7 @@ import 'package:quizlet_frontend/utilities/error_response.dart';
 import 'package:quizlet_frontend/utilities/page_response.dart';
 import 'package:http/http.dart' as http;
 import 'package:quizlet_frontend/word/word_model.dart';
+import 'package:stomp_dart_client/stomp_dart_client.dart';
 
 class ApiService {
   static late UserModel userModel;
