@@ -6,6 +6,8 @@ import 'package:quizlet_frontend/games/essay_questions.dart';
 import 'package:quizlet_frontend/games/multiple_choice_game.dart';
 import 'package:quizlet_frontend/games/yesno_game.dart';
 
+import '../services/api_service.dart';
+import '../utilities/list_util.dart';
 import '../word/word_model.dart';
 
 class TestPage extends StatefulWidget {
@@ -19,6 +21,7 @@ class TestPage extends StatefulWidget {
 
 class _TestPageState extends State<TestPage> {
   int currentItem = 0;
+  final List<String> wordIdList = [];
 
   @override
   Widget build(BuildContext context) {
@@ -38,12 +41,16 @@ class _TestPageState extends State<TestPage> {
         int maxAnswer =
             widget.wordModels.length < 4 ? widget.wordModels.length : 4;
         List<String> randomWordList = [];
+        Random random = Random();
+        randomWordList.add(widget.wordModels[currentItem].definition!);
+
         while (randomWordList.length != maxAnswer) {
           var rd = random.nextInt(widget.wordModels.length);
           if (!randomWordList.contains(widget.wordModels[rd].definition!)) {
             randomWordList.add(widget.wordModels[rd].definition!);
           }
         }
+        shuffle(randomWordList);
         questionWidget = MultipleChoiceGame(
           currentWord: widget.wordModels[currentItem],
           answerList: randomWordList,
@@ -95,10 +102,17 @@ class _TestPageState extends State<TestPage> {
     );
   }
 
-  void _nextWord() {
+  void _nextWord(bool result) async {
+    if (result) {
+      wordIdList.add(widget.wordModels[currentItem].id!);
+    }
+
     print('currentItem: $currentItem');
     if (currentItem == widget.wordModels.length - 1) {
-      Navigator.pop(context);
+      await ApiService.learningCount(wordIdList);
+      if (mounted) {
+        Navigator.pop(context, true);
+      }
     } else {
       setState(() {
         currentItem++;

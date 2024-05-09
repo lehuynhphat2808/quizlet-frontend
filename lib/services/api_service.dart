@@ -28,10 +28,11 @@ class ApiService {
     return jsonDecode(utf8.decode(data));
   }
 
-  static Future<PageResponse> getPageTopic() async {
-    var res = await http.get(Uri.parse('${baseUrl}topics'), headers: headers);
+  static Future<PageResponse> getPageTopic([String? name = '']) async {
+    var res = await http.get(Uri.parse('${baseUrl}topics?filter=name-$name'),
+        headers: headers);
     if (res.statusCode == 200) {
-      Map<String, dynamic> response = jsonDecode(res.body);
+      Map<String, dynamic> response = decodeData(res.bodyBytes);
       if (kDebugMode) {
         print(response);
       }
@@ -41,11 +42,14 @@ class ApiService {
     }
   }
 
-  static Future<PageResponse> getPageTopicPublic() async {
-    var res = await http.get(Uri.parse('${baseUrl}topics/community'),
+  static Future<PageResponse> getPageTopicPublic(
+      {String? name = '', int? page, int? size}) async {
+    var res = await http.get(
+        Uri.parse(
+            '${baseUrl}topics/community?page=${page ?? 0}&size=${size ?? 10}&filter=name-$name'),
         headers: headers);
     if (res.statusCode == 200) {
-      Map<String, dynamic> response = jsonDecode(res.body);
+      Map<String, dynamic> response = decodeData(res.bodyBytes);
       if (kDebugMode) {
         print(response);
       }
@@ -62,7 +66,8 @@ class ApiService {
       Map<String, dynamic> response = jsonDecode(res.body);
       return TopicModel.fromJson(response);
     } else {
-      throw Exception("Load page fail ${res.statusCode}");
+      print('addTopic fail: ${res.body}');
+      throw Exception("addTopic fail ${res.statusCode}");
     }
   }
 
@@ -96,7 +101,7 @@ class ApiService {
     var res = await http.delete(Uri.parse('${baseUrl}topics/$topicId'),
         headers: headers);
     if (res.statusCode != 200) {
-      throw Exception("deleteTopic fail ${res.statusCode}");
+      throw Exception("deleteTopic fail ${res.statusCode} ${res.body}");
     }
     if (kDebugMode) {
       print('Delete Topic: $topicId');
@@ -122,6 +127,30 @@ class ApiService {
     }
   }
 
+  static Future<void> markWord(List<String> wordIdList) async {
+    var res = await http.put(Uri.parse('${baseUrl}word-factors/marking'),
+        headers: headers, body: jsonEncode({'wordIds': wordIdList}));
+    if (res.statusCode != 200) {
+      throw Exception("markWord fail ${res.statusCode}");
+    }
+  }
+
+  static Future<void> unMarking(List<String> wordIdList) async {
+    var res = await http.put(Uri.parse('${baseUrl}word-factors/unmarking'),
+        headers: headers, body: jsonEncode({'wordIds': wordIdList}));
+    if (res.statusCode != 200) {
+      throw Exception("markWord fail ${res.statusCode}");
+    }
+  }
+
+  static Future<void> learningCount(List<String> wordIdList) async {
+    var res = await http.put(Uri.parse('${baseUrl}word-factors/learning-count'),
+        headers: headers, body: jsonEncode({'wordIds': wordIdList}));
+    if (res.statusCode != 200) {
+      throw Exception("markWord fail ${res.statusCode}");
+    }
+  }
+
   static Future<void> deleteWord(String wordId) async {
     var res = await http.delete(Uri.parse('${baseUrl}words/$wordId'),
         headers: headers);
@@ -142,7 +171,7 @@ class ApiService {
       if (res.body.isEmpty) {
         throw Exception("getTopic fail: res.body.isEmpty");
       }
-      Map<String, dynamic> response = jsonDecode(res.body);
+      Map<String, dynamic> response = decodeData(res.bodyBytes);
       print('getLeadingBoard2: ${response}');
       return LeadingBoardModel.fromJson(response);
     } else {
@@ -179,7 +208,7 @@ class ApiService {
     var res =
         await http.get(Uri.parse('${baseUrl}users/profile'), headers: headers);
     if (res.statusCode == 200) {
-      Map<String, dynamic> response = jsonDecode(res.body);
+      Map<String, dynamic> response = decodeData(res.bodyBytes);
       print(response);
       userModel = UserModel.fromJson(response);
     } else {
@@ -240,6 +269,56 @@ class ApiService {
         headers: headers, body: jsonEncode(addFolderModel.toJson()));
     if (res.statusCode != 200) {
       throw Exception("updateFolder fail ${res.statusCode}");
+    }
+  }
+
+  static Future<String> uploadImage(
+      String extension, Uint8List imageFile) async {
+    var res = await http.post(
+        Uri.parse(
+            '${baseUrl}s3/presigned-request?contentType=image/$extension&extension=$extension&acl=public-read'),
+        headers: headers);
+    if (res.statusCode != 200) {
+      throw Exception(
+          "presignedRequest fail ${res.statusCode}/nerror: ${res.body}");
+    }
+    Map<String, dynamic> decoded = jsonDecode(res.body);
+    var url = decoded['url'].toString().split('?')[0];
+    var uploadUrl = decoded['url'].toString();
+    print('url: $url');
+    Map<String, String> headerUploadImage = {
+      "Content-Type": "image/$extension",
+      'x-amz-acl': 'public-read'
+    };
+    var resUpload = await http.put(Uri.parse(uploadUrl),
+        headers: headerUploadImage, body: imageFile);
+    print('resUpload: status ${resUpload.statusCode}/nbody:${resUpload.body}');
+    return url;
+  }
+
+  static Future<void> updateProfile(
+      {String? avatar, String? nickname, String? languageCode}) async {
+    var res = await http.put(Uri.parse('${baseUrl}users/profile'),
+        headers: headers,
+        body: jsonEncode({
+          'avatar': avatar ?? userModel.avatar,
+          'nickname': nickname ?? userModel.nickname,
+          'languageCode': languageCode ?? userModel.languageCode
+        }));
+    if (res.statusCode != 200) {
+      throw Exception("updateProfile fail ${res.statusCode}");
+    }
+  }
+
+  static Future<List<WordModel>> getWordMarked() async {
+    var res = await http.get(Uri.parse('${baseUrl}word-factors/marking'),
+        headers: headers);
+    if (res.statusCode == 200) {
+      List<WordModel> response =
+          WordModel.getWordModelList(decodeData(res.bodyBytes));
+      return response;
+    } else {
+      throw Exception("getFolder fail ${res.statusCode}");
     }
   }
 }

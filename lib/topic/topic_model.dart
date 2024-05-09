@@ -55,9 +55,28 @@ class TopicModel {
   bool isSameInformation(TopicModel newTopic) {
     return (name != newTopic.name ||
             public != newTopic.public ||
-            url == newTopic.url)
+            url != newTopic.url)
         ? false
         : true;
+  }
+
+  TopicModel copyWith({
+    String? id,
+    String? name,
+    int? wordCount,
+    String? url,
+    bool? public,
+    List<WordModel>? words,
+    UserModel? owner,
+  }) {
+    return TopicModel(
+        id: id ?? this.id,
+        name: name ?? this.name,
+        wordCount: wordCount ?? this.wordCount,
+        url: url ?? this.url,
+        public: public ?? this.public,
+        words: words ?? this.words,
+        owner: owner ?? this.owner);
   }
 
   int indexWord(String? wordId) {

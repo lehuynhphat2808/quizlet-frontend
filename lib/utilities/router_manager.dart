@@ -15,6 +15,8 @@ import 'package:quizlet_frontend/main/main_page.dart';
 import 'package:quizlet_frontend/games/flash_card_page.dart';
 import 'package:quizlet_frontend/word/word_model.dart';
 
+import '../topic/word_marked_page.dart';
+
 class Routes {
   static const String loginPage = "/loginPage";
   static const String mainPage = "/";
@@ -22,6 +24,7 @@ class Routes {
   static const String updateTopicPage = "/updateTopicPage";
   static const String updateFolderPage = "/updateFolderPage";
   static const String topicPage = "/topic";
+  static const String wordMarkedPage = "/wordMarkedPage";
   static const String folderDetailPage = "/folderDetailPage";
   static const String flashCardPage = '/flashCard';
   static const String learningPage = '/learningPage';
@@ -67,6 +70,11 @@ class RouteGenerator {
             builder: (context) => TopicPage(
                   TOPIC_ID: routeSettings.arguments.toString(),
                 ));
+      case Routes.wordMarkedPage:
+        return MaterialPageRoute(
+            settings: routeSettings,
+            builder: (context) => WordMarkedPage(
+                topicModel: routeSettings.arguments as TopicModel));
       case Routes.folderDetailPage:
         return MaterialPageRoute(
             settings: routeSettings,
@@ -74,10 +82,12 @@ class RouteGenerator {
                   id: routeSettings.arguments.toString(),
                 ));
       case Routes.flashCardPage:
+        List<dynamic> args = routeSettings.arguments as List<dynamic>;
         return MaterialPageRoute(
             settings: routeSettings,
             builder: (context) => FlashCardPage(
-                  wordModels: routeSettings.arguments as List<WordModel>,
+                  wordModels: args[0],
+                  isBack: args[1],
                 ));
       case Routes.learningPage:
         return MaterialPageRoute(

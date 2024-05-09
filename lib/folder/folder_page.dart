@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:quizlet_frontend/folder/folder_model.dart';
 import 'package:quizlet_frontend/services/api_service.dart';
 import 'package:quizlet_frontend/utilities/page_response.dart';
@@ -50,7 +51,7 @@ class FolderPageState extends State<FolderPage> {
                     ),
                     subtitle: Row(
                       children: [
-                        const Text('0 topics'),
+                        Text('${folderModelList[index].topicCount} topics'),
                         SizedBox(
                           height: 18,
                           child: VerticalDivider(
@@ -81,7 +82,9 @@ class FolderPageState extends State<FolderPage> {
             },
           );
         } else {
-          return CircularProgressIndicator();
+          return Center(
+              child: LoadingAnimationWidget.discreteCircle(
+                  color: Colors.grey[300]!, size: 40));
         }
       },
     );

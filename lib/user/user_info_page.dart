@@ -4,8 +4,15 @@ import 'package:quizlet_frontend/services/api_service.dart';
 import '../services/auth0_service.dart';
 import '../utilities/router_manager.dart';
 
-class UserInfoPage extends StatelessWidget {
+class UserInfoPage extends StatefulWidget {
   const UserInfoPage({super.key});
+
+  @override
+  State<UserInfoPage> createState() => _UserInfoPageState();
+}
+
+class _UserInfoPageState extends State<UserInfoPage> {
+  bool updated = false;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -15,6 +22,12 @@ class UserInfoPage extends StatelessWidget {
           style: TextStyle(fontWeight: FontWeight.bold, fontFamily: "Pacifico"),
         ),
         centerTitle: true,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () {
+            Navigator.pop(context, updated);
+          },
+        ),
       ),
       body: SafeArea(
         child: Padding(
@@ -53,15 +66,69 @@ class UserInfoPage extends StatelessWidget {
                                 bottom: BorderSide(
                                     color:
                                         Color.fromRGBO(179, 179, 179, 1.0)))),
-                        child: ListTile(
-                          title: const Text(
-                            'Username',
-                            style: TextStyle(fontWeight: FontWeight.bold),
+                        child: GestureDetector(
+                          onTap: () {},
+                          child: GestureDetector(
+                            onTap: () async {
+                              TextEditingController textController =
+                                  TextEditingController();
+                              await showDialog(
+                                context: context,
+                                builder: (context) => AlertDialog(
+                                  title: const Text('Change Username'),
+                                  content: TextField(
+                                    controller: textController,
+                                    autofocus: true,
+                                    decoration: const InputDecoration(
+                                        hintText: "Enter your new name"),
+                                  ),
+                                  actions: <Widget>[
+                                    TextButton(
+                                      style: TextButton.styleFrom(
+                                        textStyle: Theme.of(context)
+                                            .textTheme
+                                            .labelLarge,
+                                      ),
+                                      child: const Text('Cancel'),
+                                      onPressed: () {
+                                        Navigator.of(context).pop();
+                                      },
+                                    ),
+                                    TextButton(
+                                      style: TextButton.styleFrom(
+                                        textStyle: Theme.of(context)
+                                            .textTheme
+                                            .labelLarge,
+                                      ),
+                                      child: const Text('Confirm'),
+                                      onPressed: () async {
+                                        await ApiService.updateProfile(
+                                            nickname: textController.text);
+                                        await ApiService.getProfile();
+                                        if (context.mounted) {
+                                          Navigator.of(context).pop();
+                                        }
+
+                                        setState(() {
+                                          updated = true;
+                                        });
+                                      },
+                                    ),
+                                  ],
+                                ),
+                              );
+                            },
+                            child: ListTile(
+                              title: const Text(
+                                'Username',
+                                style: TextStyle(fontWeight: FontWeight.bold),
+                              ),
+                              subtitle: Text(
+                                ApiService.userModel.nickname,
+                              ),
+                              trailing: const Icon(Icons.navigate_next),
+                            ),
                           ),
-                          subtitle: Text(
-                            '${Auth0Service.credentials!.user.nickname}',
-                          ),
-                          trailing: const Icon(Icons.navigate_next),
                         ),
                       ),
                       Container(
@@ -350,7 +417,7 @@ class _UpdatePasswordFormState extends State<UpdatePasswordForm> {
                   renewPassword = newValue;
                 },
               ),
-              SizedBox(
+              const SizedBox(
                 height: 16,
               ),
               Text(

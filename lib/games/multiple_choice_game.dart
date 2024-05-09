@@ -18,12 +18,14 @@ class MultipleChoiceGame extends StatefulWidget {
 }
 
 class _MultipleChoiceGameState extends State<MultipleChoiceGame> {
+  bool result = false;
   @override
   Widget build(BuildContext context) {
     return _buildLearningGame();
   }
 
   Widget _buildLearningGame() {
+    result = false;
     return Expanded(
       child: Column(
         children: [
@@ -73,6 +75,7 @@ class _MultipleChoiceGameState extends State<MultipleChoiceGame> {
     return TextButton(
       onPressed: () async {
         if (text == widget.currentWord.definition) {
+          result = true;
           AwesomeDialog(
             context: context,
             dismissOnTouchOutside: false,
@@ -120,7 +123,7 @@ class _MultipleChoiceGameState extends State<MultipleChoiceGame> {
             ),
             btnOkText: "Continue",
             btnOkOnPress: () {
-              widget.handleOnOkClick!.call();
+              widget.handleOnOkClick!.call(result);
             },
           ).show();
         } else {
@@ -197,7 +200,7 @@ class _MultipleChoiceGameState extends State<MultipleChoiceGame> {
             btnOkColor: Colors.blue,
             btnOkText: "Continue",
             btnOkOnPress: () {
-              widget.handleOnOkClick!.call();
+              widget.handleOnOkClick!.call(false);
             },
           ).show();
         }

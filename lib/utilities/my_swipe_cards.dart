@@ -121,13 +121,21 @@ class _SwipeCardsState extends State<SwipeCards> {
   }
 
   void _onSlideUpdate(double distance) {
+    if (slideRegion == SlideRegion.inLikeRegion) {
+      // green
+      widget.showBorder?.call(true, Colors.green);
+    } else if (slideRegion == SlideRegion.inNopeRegion) {
+      // orange
+      widget.showBorder?.call(true, Colors.orange);
+    } else {
+      widget.showBorder?.call(true, Colors.black);
+    }
+
     setState(() {
       _nextCardScale = 0.9 + (0.1 * (distance / 100.0)).clamp(0.0, 0.1);
     });
-    if (distance > 5) {
-      widget.showBorder?.call(true);
-    } else {
-      widget.showBorder?.call(false);
+    if (distance < 5) {
+      widget.showBorder?.call(false, Colors.black);
     }
   }
 
@@ -142,7 +150,7 @@ class _SwipeCardsState extends State<SwipeCards> {
   }
 
   void _onSlideOutComplete(SlideDirection? direction) {
-    widget.showBorder?.call(false);
+    widget.showBorder?.call(false, Colors.black);
     SwipeItem? currentMatch = widget.matchEngine.currentItem;
     switch (direction) {
       case SlideDirection.left:

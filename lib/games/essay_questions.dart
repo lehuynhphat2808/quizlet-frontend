@@ -1,5 +1,6 @@
 import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:flutter/material.dart';
+import 'package:quizlet_frontend/utilities/tts_uti.dart';
 import 'package:quizlet_frontend/word/word_model.dart';
 
 class EssayGame extends StatefulWidget {
@@ -12,7 +13,15 @@ class EssayGame extends StatefulWidget {
 }
 
 class _EssayGameState extends State<EssayGame> {
+  bool result = false;
   final TextEditingController _textEditingController = TextEditingController();
+  FocusNode focusNode = FocusNode();
+
+  @override
+  void initState() {
+    super.initState();
+  }
+
   @override
   void dispose() {
     _textEditingController.dispose();
@@ -21,6 +30,8 @@ class _EssayGameState extends State<EssayGame> {
 
   @override
   Widget build(BuildContext context) {
+    result = false;
+    _textEditingController.clear();
     return _buildLearningGame();
   }
 
@@ -29,21 +40,40 @@ class _EssayGameState extends State<EssayGame> {
       child: Column(
         children: [
           Expanded(
-            child: Container(
-              alignment: Alignment.center,
-              child: Text(
-                widget.currentWord.name!,
-                style: const TextStyle(fontSize: 32),
-              ),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Container(
+                  child: IconButton(
+                    onPressed: () {
+                      speak(widget.currentWord.name);
+                    },
+                    icon: const ImageIcon(
+                      AssetImage('assets/images/volume_icon.png'),
+                      size: 64,
+                    ),
+                  ),
+                ),
+                Container(
+                  alignment: Alignment.center,
+                  child: Text(
+                    widget.currentWord.name!,
+                    style: const TextStyle(fontSize: 64),
+                  ),
+                ),
+              ],
             ),
           ),
           Container(
               padding: const EdgeInsets.only(left: 8, right: 8, bottom: 50),
               child: TextField(
+                focusNode: focusNode,
+                autofocus: true,
                 decoration: const InputDecoration(hintText: "Your answer"),
                 controller: _textEditingController,
                 onSubmitted: (value) {
                   if (value == widget.currentWord.definition) {
+                    result = true;
                     _showCorrectDialog();
                   } else {
                     _showWrongDialog();
@@ -102,7 +132,13 @@ class _EssayGameState extends State<EssayGame> {
       ),
       btnOkText: "Continue",
       btnOkOnPress: () {
-        widget.handleOnOkClick!.call();
+        setState(() {
+          // update state
+
+          focusNode.requestFocus();
+        });
+
+        widget.handleOnOkClick!.call(result);
       },
     ).show();
   }
@@ -181,10 +217,7 @@ class _EssayGameState extends State<EssayGame> {
       btnOkColor: Colors.blue,
       btnOkText: "Continue",
       btnOkOnPress: () {
-        widget.handleOnOkClick!.call();
-        setState(() {
-          _textEditingController.text = '';
-        });
+        widget.handleOnOkClick!.call(result);
       },
     ).show();
   }

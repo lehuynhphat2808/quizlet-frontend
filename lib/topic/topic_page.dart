@@ -9,8 +9,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_tts/flutter_tts.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
+import 'package:percent_indicator/circular_percent_indicator.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:quizlet_frontend/services/api_service.dart';
 import 'package:quizlet_frontend/topic/topic_cubit/topic_bloc.dart';
@@ -22,8 +22,7 @@ import 'package:quizlet_frontend/utilities/tts_uti.dart';
 import 'package:quizlet_frontend/word/word_model.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-
-import '../services/auth0_service.dart';
+import 'package:translator/translator.dart';
 
 class TopicPage extends StatefulWidget {
   final String TOPIC_ID;
@@ -34,6 +33,8 @@ class TopicPage extends StatefulWidget {
 }
 
 class _TopicPageState extends State<TopicPage> {
+  bool reset = false;
+  bool isBack = false;
   bool defaultOrder = true;
   TopicModel? topicModel;
   Credentials? credentials;
@@ -82,6 +83,12 @@ class _TopicPageState extends State<TopicPage> {
                         onPressed: () async {
                           await _exportCsv();
                           if (context.mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text('Csv was exported to Download'),
+                              ),
+                            );
+
                             Navigator.of(context).pop();
                           }
                         },
@@ -262,41 +269,61 @@ class _TopicPageState extends State<TopicPage> {
     );
   }
 
+  void _getSide(bool value) {
+    isBack = value;
+  }
+
   Widget _buildListCardPlay(List<WordModel> wordModels) {
     var mySliderKey = GlobalKey<MySliderState>();
     return Column(
       children: [
         GestureDetector(
-          onTap: () async {
-            AwesomeDialog(
-              context: context,
-              animType: AnimType.scale,
-              dialogType: DialogType.info,
-              body: Column(
-                children: [
-                  const Text(
-                    'Setting for FlashCard',
-                    style: TextStyle(
-                        fontStyle: FontStyle.italic,
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold),
-                  ),
-                  const Text('Choose the number of words to learn'),
-                  MySlider(
-                    key: mySliderKey,
-                    max: wordModels.length.toDouble(),
-                  )
-                ],
-              ),
-              btnOkOnPress: () {
-                Navigator.pushNamed(context, Routes.flashCardPage,
-                    arguments: _getRandomWordList(
-                        mySliderKey.currentState!.currentSliderValue.toInt()));
-              },
-              btnCancelOnPress: () {},
-            ).show();
+          onTap: () {
+            if (topicModel!.words!.isNotEmpty) {
+              AwesomeDialog(
+                context: context,
+                animType: AnimType.scale,
+                dialogType: DialogType.info,
+                body: Column(
+                  children: [
+                    const Text(
+                      'Setting for FlashCard',
+                      style: TextStyle(
+                          fontStyle: FontStyle.italic,
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold),
+                    ),
+                    const Text('Choose the number of words to learn'),
+                    MySlider(
+                      key: mySliderKey,
+                      max: wordModels.length.toDouble(),
+                    ),
+                    MyRBtn(getValue: _getSide),
+                  ],
+                ),
+                btnOkOnPress: () async {
+                  var reset = await Navigator.pushNamed(
+                      context, Routes.flashCardPage,
+                      arguments: [
+                        _getRandomWordList(
+                          mySliderKey.currentState!.currentSliderValue.toInt(),
+                        ),
+                        isBack
+                      ]);
+                  if (reset != null && reset == true && mounted) {
+                    context.read<TopicCubit>().getTopic(widget.TOPIC_ID);
+
+                    setState(() {});
+                  }
+                },
+                btnCancelOnPress: () {},
+              ).show();
+            }
           },
           child: Card(
+            color: topicModel!.words!.isEmpty
+                ? Colors.grey.withOpacity(0.3)
+                : null,
             child: ListTile(
               title: Text(
                 'Flash Card',
@@ -308,35 +335,47 @@ class _TopicPageState extends State<TopicPage> {
         ),
         GestureDetector(
           onTap: () {
-            AwesomeDialog(
-              context: context,
-              animType: AnimType.scale,
-              dialogType: DialogType.info,
-              body: Column(
-                children: [
-                  const Text(
-                    'Setting for Learning',
-                    style: TextStyle(
-                        fontStyle: FontStyle.italic,
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold),
-                  ),
-                  const Text('Choose the number of words to learn'),
-                  MySlider(
-                    key: mySliderKey,
-                    max: wordModels.length.toDouble(),
-                  )
-                ],
-              ),
-              btnOkOnPress: () {
-                Navigator.pushNamed(context, Routes.learningPage,
-                    arguments: _getRandomWordList(
-                        mySliderKey.currentState!.currentSliderValue.toInt()));
-              },
-              btnCancelOnPress: () {},
-            ).show();
+            if (topicModel!.words!.isNotEmpty) {
+              AwesomeDialog(
+                context: context,
+                animType: AnimType.scale,
+                dialogType: DialogType.info,
+                body: Column(
+                  children: [
+                    const Text(
+                      'Setting for Learning',
+                      style: TextStyle(
+                          fontStyle: FontStyle.italic,
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold),
+                    ),
+                    const Text('Choose the number of words to learn'),
+                    MySlider(
+                      key: mySliderKey,
+                      max: wordModels.length.toDouble(),
+                    ),
+                  ],
+                ),
+                btnOkOnPress: () async {
+                  var reset = await Navigator.pushNamed(
+                      context, Routes.learningPage,
+                      arguments: _getRandomWordList(mySliderKey
+                          .currentState!.currentSliderValue
+                          .toInt()));
+                  if (reset != null && reset == true && mounted) {
+                    context.read<TopicCubit>().getTopic(widget.TOPIC_ID);
+
+                    setState(() {});
+                  }
+                },
+                btnCancelOnPress: () {},
+              ).show();
+            }
           },
           child: Card(
+            color: topicModel!.words!.isEmpty
+                ? Colors.grey.withOpacity(0.3)
+                : null,
             child: ListTile(
               title: Text(
                 'Learning',
@@ -348,35 +387,49 @@ class _TopicPageState extends State<TopicPage> {
         ),
         GestureDetector(
           onTap: () {
-            AwesomeDialog(
-              context: context,
-              animType: AnimType.scale,
-              dialogType: DialogType.info,
-              body: Column(
-                children: [
-                  const Text(
-                    'Setting for Typing',
-                    style: TextStyle(
-                        fontStyle: FontStyle.italic,
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold),
-                  ),
-                  const Text('Choose the number of words to learn'),
-                  MySlider(
-                    key: mySliderKey,
-                    max: wordModels.length.toDouble(),
-                  )
-                ],
-              ),
-              btnOkOnPress: () {
-                Navigator.pushNamed(context, Routes.typingPage,
+            if (topicModel!.words!.isNotEmpty) {
+              AwesomeDialog(
+                context: context,
+                animType: AnimType.scale,
+                dialogType: DialogType.info,
+                body: Column(
+                  children: [
+                    const Text(
+                      'Setting for Typing',
+                      style: TextStyle(
+                          fontStyle: FontStyle.italic,
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold),
+                    ),
+                    const Text('Choose the number of words to learn'),
+                    MySlider(
+                      key: mySliderKey,
+                      max: wordModels.length.toDouble(),
+                    )
+                  ],
+                ),
+                btnOkOnPress: () async {
+                  var reset = await Navigator.pushNamed(
+                    context,
+                    Routes.typingPage,
                     arguments: _getRandomWordList(
-                        mySliderKey.currentState!.currentSliderValue.toInt()));
-              },
-              btnCancelOnPress: () {},
-            ).show();
+                      mySliderKey.currentState!.currentSliderValue.toInt(),
+                    ),
+                  );
+                  if (reset != null && reset == true && mounted) {
+                    context.read<TopicCubit>().getTopic(widget.TOPIC_ID);
+
+                    setState(() {});
+                  }
+                },
+                btnCancelOnPress: () {},
+              ).show();
+            }
           },
           child: Card(
+            color: topicModel!.words!.isEmpty
+                ? Colors.grey.withOpacity(0.3)
+                : null,
             child: ListTile(
               title: Text(
                 'Typing',
@@ -388,35 +441,41 @@ class _TopicPageState extends State<TopicPage> {
         ),
         GestureDetector(
           onTap: () {
-            AwesomeDialog(
-              context: context,
-              animType: AnimType.scale,
-              dialogType: DialogType.info,
-              body: Column(
-                children: [
-                  const Text(
-                    'Setting for Test',
-                    style: TextStyle(
-                        fontStyle: FontStyle.italic,
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold),
-                  ),
-                  const Text('Choose the number of words to learn'),
-                  MySlider(
-                    key: mySliderKey,
-                    max: wordModels.length.toDouble(),
-                  )
-                ],
-              ),
-              btnOkOnPress: () {
-                Navigator.pushNamed(context, Routes.testPage,
-                    arguments: _getRandomWordList(
-                        mySliderKey.currentState!.currentSliderValue.toInt()));
-              },
-              btnCancelOnPress: () {},
-            ).show();
+            if (topicModel!.words!.isNotEmpty) {
+              AwesomeDialog(
+                context: context,
+                animType: AnimType.scale,
+                dialogType: DialogType.info,
+                body: Column(
+                  children: [
+                    const Text(
+                      'Setting for Test',
+                      style: TextStyle(
+                          fontStyle: FontStyle.italic,
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold),
+                    ),
+                    const Text('Choose the number of words to learn'),
+                    MySlider(
+                      key: mySliderKey,
+                      max: wordModels.length.toDouble(),
+                    )
+                  ],
+                ),
+                btnOkOnPress: () {
+                  Navigator.pushNamed(context, Routes.testPage,
+                      arguments: _getRandomWordList(mySliderKey
+                          .currentState!.currentSliderValue
+                          .toInt()));
+                },
+                btnCancelOnPress: () {},
+              ).show();
+            }
           },
           child: Card(
+            color: topicModel!.words!.isEmpty
+                ? Colors.grey.withOpacity(0.3)
+                : null,
             child: ListTile(
               title: Text(
                 'Test',
@@ -427,11 +486,19 @@ class _TopicPageState extends State<TopicPage> {
           ),
         ),
         GestureDetector(
-          onTap: () {
-            Navigator.pushNamed(context, Routes.cardPairing,
-                arguments: _getRandomWordList(6));
+          onTap: () async {
+            if (topicModel!.words!.isNotEmpty) {
+              var score = await Navigator.pushNamed(context, Routes.cardPairing,
+                  arguments: _getRandomWordList(6));
+              if (score != null) {
+                await ApiService.addScore(widget.TOPIC_ID, score as int);
+              }
+            }
           },
           child: Card(
+            color: topicModel!.words!.isEmpty
+                ? Colors.grey.withOpacity(0.3)
+                : null,
             child: ListTile(
               title: Text(
                 'Card pairing',
@@ -445,10 +512,15 @@ class _TopicPageState extends State<TopicPage> {
         topicModel!.public!
             ? GestureDetector(
                 onTap: () {
-                  Navigator.pushNamed(context, Routes.leadingBoadPage,
-                      arguments: topicModel!.id);
+                  if (topicModel!.words!.isNotEmpty) {
+                    Navigator.pushNamed(context, Routes.leadingBoadPage,
+                        arguments: topicModel!.id);
+                  }
                 },
                 child: Card(
+                  color: topicModel!.words!.isEmpty
+                      ? Colors.grey.withOpacity(0.3)
+                      : null,
                   child: ListTile(
                     title: Text(
                       'Leading Board',
@@ -464,40 +536,107 @@ class _TopicPageState extends State<TopicPage> {
     );
   }
 
+  Widget _getStatus(double num) {
+    if (num < 25) {
+      return Text(
+        'Not learned',
+        style: TextStyle(color: Colors.pinkAccent, fontSize: 12),
+      );
+    }
+    if (num < 75) {
+      return Text(
+        'Learned',
+        style: TextStyle(color: Colors.orange, fontSize: 12),
+      );
+    }
+    return Text(
+      'Memorized',
+      style: TextStyle(color: Colors.green, fontSize: 12),
+    );
+  }
+
   Widget _buildCardWords(WordModel wordModel) {
-    return Card(
-      color: Colors.white,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  '${wordModel.name}',
-                  style: const TextStyle(fontSize: 20),
-                ),
-                Row(
+    print('wordModel: ${wordModel.learningCount}');
+    return SizedBox(
+      height: 115,
+      child: Stack(
+        children: [
+          Align(
+            alignment: Alignment.center,
+            child: Card(
+              color: Colors.white,
+              child: Padding(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    IconButton(
-                      onPressed: () async {
-                        await speak(wordModel.name);
-                      },
-                      icon: Icon(Icons.volume_up),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          '${wordModel.name}',
+                          style: const TextStyle(fontSize: 20),
+                        ),
+                        Row(
+                          children: [
+                            IconButton(
+                              onPressed: () async {
+                                await speak(wordModel.name);
+                              },
+                              icon: const Icon(Icons.volume_up),
+                            ),
+                            if (wordModel.marked!)
+                              IconButton(
+                                  onPressed: () async {
+                                    await ApiService.unMarking([wordModel.id!]);
+                                    setState(() {
+                                      wordModel.marked = false;
+                                      reset = true;
+                                    });
+                                  },
+                                  icon: const Icon(
+                                    Icons.star,
+                                    color: Colors.yellow,
+                                  ))
+                            else
+                              IconButton(
+                                  onPressed: () async {
+                                    await ApiService.markWord([wordModel.id!]);
+                                    setState(() {
+                                      wordModel.marked = true;
+                                      reset = true;
+                                    });
+                                  },
+                                  icon: const Icon(Icons.star_outline_sharp)),
+                          ],
+                        )
+                      ],
                     ),
-                    Icon(Icons.star_outline_sharp)
+                    Text(
+                      '${wordModel.definition}',
+                      style: const TextStyle(fontSize: 20),
+                    )
                   ],
-                )
-              ],
+                ),
+              ),
             ),
-            Text(
-              '${wordModel.definition}',
-              style: const TextStyle(fontSize: 20),
-            )
-          ],
-        ),
+          ),
+          Align(
+            alignment: Alignment.center,
+            child: CircularPercentIndicator(
+              radius: 40.0,
+              lineWidth: 2.0,
+              percent: wordModel.learningCount! < 20
+                  ? (wordModel.learningCount! / 20)
+                  : 1,
+              center: _getStatus(
+                (wordModel.learningCount! / 20) * 100,
+              ),
+              progressColor: Colors.green,
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -703,7 +842,7 @@ class MySlider extends StatefulWidget {
 }
 
 class MySliderState extends State<MySlider> {
-  double currentSliderValue = 0;
+  double currentSliderValue = 1;
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -721,9 +860,13 @@ class MySliderState extends State<MySlider> {
           divisions: widget.max.toInt(),
           label: currentSliderValue.round().toString(),
           onChanged: (double value) {
-            setState(() {
-              currentSliderValue = value;
-            });
+            if (value < 1) {
+              currentSliderValue = 1;
+            } else {
+              setState(() {
+                currentSliderValue = value;
+              });
+            }
           },
         ),
       ],
@@ -808,13 +951,58 @@ class _MyCardWordState extends State<MyCardWord> {
               onPressed: () async {
                 print('isEnglish: $isEnglish');
                 if (!isEnglish) {
-                  await speak(word, 'vi');
+                  Translation translation = await word.translate();
+                  var lanCode = translation.sourceLanguage.code;
+                  print("Language Code: $lanCode");
+
+                  await speak(word);
                 } else {
                   await speak(word);
                 }
               },
             ),
           ),
+        ),
+      ],
+    );
+  }
+}
+
+class MyRBtn extends StatefulWidget {
+  final Function getValue;
+  const MyRBtn({super.key, required this.getValue});
+
+  @override
+  State<MyRBtn> createState() => _MyRBtnState();
+}
+
+class _MyRBtnState extends State<MyRBtn> {
+  bool selectedValue = false;
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        RadioListTile(
+          title: const Text('FRONT'),
+          value: false,
+          groupValue: selectedValue,
+          onChanged: (value) {
+            setState(() {
+              selectedValue = value!;
+            });
+            widget.getValue(selectedValue);
+          },
+        ),
+        RadioListTile(
+          title: const Text('BACK'),
+          value: true,
+          groupValue: selectedValue,
+          onChanged: (value) {
+            setState(() {
+              selectedValue = value!;
+            });
+            widget.getValue(selectedValue);
+          },
         ),
       ],
     );

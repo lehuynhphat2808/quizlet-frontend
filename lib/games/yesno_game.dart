@@ -19,8 +19,11 @@ class YesNoGame extends StatefulWidget {
 }
 
 class _YesNoGameState extends State<YesNoGame> {
+  bool result = false;
+
   @override
   Widget build(BuildContext context) {
+    result = false;
     return _buildYesNoGame();
   }
 
@@ -71,12 +74,14 @@ class _YesNoGameState extends State<YesNoGame> {
               'widget.answer == widget.currentWord.definition: ${widget.answer == widget.currentWord.definition}');
           if (widget.answer == widget.currentWord.definition) {
             if (text == 'Yes') {
+              result = true;
               _showCorrectDialog();
             } else {
               _showWrongDialog();
             }
           } else {
             if (text == "No") {
+              result = true;
               _showCorrectDialog();
             } else {
               _showWrongDialog();
@@ -144,7 +149,7 @@ class _YesNoGameState extends State<YesNoGame> {
       ),
       btnOkText: "Continue",
       btnOkOnPress: () {
-        widget.handleOnOkClick!.call();
+        widget.handleOnOkClick!.call(result);
       },
     ).show();
   }
@@ -218,7 +223,7 @@ class _YesNoGameState extends State<YesNoGame> {
       btnOkColor: Colors.blue,
       btnOkText: "Continue",
       btnOkOnPress: () {
-        widget.handleOnOkClick!.call();
+        widget.handleOnOkClick!.call(result);
       },
     ).show();
   }

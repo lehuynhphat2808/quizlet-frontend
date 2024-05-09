@@ -64,19 +64,7 @@ class _MainPageState extends State<MainPage> {
   ];
 
   final List<PreferredSizeWidget?> appBarList = [
-    AppBar(
-      title: EasySearchBar(
-        backgroundColor: Colors.white,
-        title: const Text(
-          "Hone",
-          style: TextStyle(fontWeight: FontWeight.bold, fontFamily: 'Pacifico'),
-        ),
-        onSearch: (String) {},
-      ),
-      centerTitle: true,
-      elevation: 4,
-      shadowColor: Colors.grey,
-    ),
+    null,
     AppBar(
       title: const Text(
         "Topic",

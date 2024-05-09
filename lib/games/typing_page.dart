@@ -5,6 +5,7 @@ import 'package:linear_progress_bar/linear_progress_bar.dart';
 import 'package:quizlet_frontend/games/essay_questions.dart';
 import 'package:quizlet_frontend/games/multiple_choice_game.dart';
 import 'package:quizlet_frontend/games/yesno_game.dart';
+import 'package:quizlet_frontend/services/api_service.dart';
 
 import '../word/word_model.dart';
 
@@ -19,13 +20,10 @@ class TypingPage extends StatefulWidget {
 
 class _TypingPageState extends State<TypingPage> {
   int currentItem = 0;
+  final List<String> wordIdList = [];
 
   @override
   Widget build(BuildContext context) {
-    Widget questionWidget = EssayGame(
-      currentWord: widget.wordModels[currentItem],
-      handleOnOkClick: _nextWord,
-    );
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
@@ -59,7 +57,10 @@ class _TypingPageState extends State<TypingPage> {
           progressColor: Colors.deepPurple,
           backgroundColor: Colors.grey,
         ),
-        questionWidget,
+        EssayGame(
+          currentWord: widget.wordModels[currentItem],
+          handleOnOkClick: _nextWord,
+        ),
         const SizedBox(
           height: 20,
         ),
@@ -67,10 +68,16 @@ class _TypingPageState extends State<TypingPage> {
     );
   }
 
-  void _nextWord() {
+  void _nextWord(bool result) async {
+    if (result) {
+      wordIdList.add(widget.wordModels[currentItem].id!);
+    }
     print('currentItem: $currentItem');
     if (currentItem == widget.wordModels.length - 1) {
-      Navigator.pop(context);
+      await ApiService.learningCount(wordIdList);
+      if (mounted) {
+        Navigator.pop(context, true);
+      }
     } else {
       setState(() {
         currentItem++;

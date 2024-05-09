@@ -15,11 +15,13 @@ class FolderModel {
   String id;
   String name;
   List<TopicModel>? topics;
+  int? topicCount;
 
   FolderModel({
     required this.id,
     required this.name,
     this.topics,
+    this.topicCount,
   });
 
   factory FolderModel.fromJson(Map<String, dynamic> json) => FolderModel(
@@ -28,12 +30,14 @@ class FolderModel {
         topics: json["topics"] == null
             ? []
             : TopicModel.getTopicModelList(json["topics"]),
+        topicCount: json['topicCount'],
       );
 
   Map<String, dynamic> toJson() => {
         "id": id,
         "name": name,
         "topics": List<dynamic>.from(topics!.map((x) => x.toJson())),
+        "topicCount": topicCount,
       };
   static List<FolderModel> getFolderModelList(List<dynamic> dynamicList) {
     List<FolderModel> folderModelList = [];

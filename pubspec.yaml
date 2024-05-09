@@ -61,6 +61,12 @@ dependencies:
   web_socket_channel: ^2.0.0
   stomp_dart_client: ^2.0.0
   easy_search_bar: ^2.5.0
+  translator: ^1.0.0
+  flutter_localization: ^0.2.0
+  language_picker: ^0.4.3
+  percent_indicator: ^4.2.3
+
+
 
 
 

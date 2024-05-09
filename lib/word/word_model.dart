@@ -8,17 +8,19 @@ class WordModel {
   String? id;
   String? name;
   String? definition;
-  bool? isMarked;
+  bool? marked;
   dynamic status;
   String? topicId;
+  int? learningCount;
 
   WordModel({
     this.id,
     this.name,
     this.definition,
-    this.isMarked,
+    this.marked,
     this.status,
     this.topicId,
+    this.learningCount,
   });
 
   static late List<WordModel> wordModelList;
@@ -35,34 +37,37 @@ class WordModel {
     String? id,
     String? name,
     String? definition,
-    bool? isMarked,
+    bool? marked,
     dynamic status,
     String? topicId,
+    int? learningCount,
   }) =>
       WordModel(
-        id: id ?? this.id,
-        name: name ?? this.name,
-        definition: definition ?? this.definition,
-        isMarked: isMarked ?? this.isMarked,
-        status: status ?? this.status,
-        topicId: topicId ?? this.topicId,
-      );
+          id: id ?? this.id,
+          name: name ?? this.name,
+          definition: definition ?? this.definition,
+          marked: marked ?? this.marked,
+          status: status ?? this.status,
+          topicId: topicId ?? this.topicId,
+          learningCount: learningCount ?? this.learningCount);
 
   factory WordModel.fromJson(Map<String, dynamic> json) => WordModel(
         id: json["id"],
         name: json["name"],
         definition: json["definition"],
-        isMarked: json["isMarked"],
+        marked: json["marked"],
         status: json["status"],
         topicId: json["topicId"],
+        learningCount: json["learningCount"],
       );
 
   Map<String, dynamic> toJson() => {
         "id": id,
         "name": name,
         "definition": definition,
-        "isMarked": isMarked,
+        "marked": marked,
         "status": status,
         "topicId": topicId,
+        "learningCount": learningCount,
       };
 }

@@ -8,6 +8,8 @@ import 'package:quizlet_frontend/utilities/router_manager.dart';
 import 'package:quizlet_frontend/word/bloc/word_bloc.dart';
 import 'package:quizlet_frontend/login/login_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 
 void main() {
   runApp(MultiBlocProvider(

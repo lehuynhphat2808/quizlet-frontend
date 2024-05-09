@@ -1,5 +1,9 @@
+import 'dart:async';
+
 import 'package:flip_card/flip_card.dart';
+import 'package:flip_card/flip_card_controller.dart';
 import 'package:flutter/material.dart';
+import 'package:quizlet_frontend/services/api_service.dart';
 import 'package:swipe_cards/draggable_card.dart';
 import 'package:linear_progress_bar/linear_progress_bar.dart';
 
@@ -7,28 +11,36 @@ import '../utilities/my_swipe_cards.dart';
 import '../word/word_model.dart';
 
 class FlashCardPage extends StatefulWidget {
+  final bool? isBack;
   final List<WordModel> wordModels;
-  const FlashCardPage({super.key, required this.wordModels});
+  const FlashCardPage({super.key, required this.wordModels, this.isBack});
 
   @override
   State<FlashCardPage> createState() => _FlashCardPageState();
 }
 
 class _FlashCardPageState extends State<FlashCardPage> {
+  late List<FlipCardController> _flipCardControllerList;
+
+  Timer? timer;
+  bool isAuto = false;
   bool showBorder = false;
-  void changeValue(bool value) {
+  Color boderColor = Colors.red;
+  void changeValue(bool value, Color color) {
     setState(() {
       showBorder = value;
+      boderColor = color;
     });
   }
 
   int currentItem = 0;
 
-  int studiedWord = 0;
-  int studyingWord = 0;
+  int forgotWord = 0;
+  int memoriedNum = 0;
+  List<String> memoriedWordIdList = [];
   final List<SwipeItem> _swipeItems = <SwipeItem>[];
   MatchEngine? _matchEngine;
-  GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey();
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey();
 
   @override
   void initState() {
@@ -36,14 +48,11 @@ class _FlashCardPageState extends State<FlashCardPage> {
       _swipeItems.add(
         SwipeItem(
           likeAction: () {
-            setState(() {
-              studyingWord++;
-            });
+            memoriedNum++;
+            memoriedWordIdList.add(widget.wordModels[currentItem].id!);
           },
           nopeAction: () {
-            setState(() {
-              studiedWord++;
-            });
+            forgotWord++;
           },
 
           // superlikeAction: () {
@@ -60,7 +69,15 @@ class _FlashCardPageState extends State<FlashCardPage> {
     }
 
     _matchEngine = MatchEngine(swipeItems: _swipeItems);
+    _flipCardControllerList = List.generate(
+        widget.wordModels.length, (index) => FlipCardController());
     super.initState();
+  }
+
+  @override
+  void dispose() {
+    timer?.cancel();
+    super.dispose();
   }
 
   @override
@@ -70,15 +87,16 @@ class _FlashCardPageState extends State<FlashCardPage> {
       key: _scaffoldKey,
       appBar: AppBar(
         leading: IconButton(
-          icon: Icon(Icons.close),
+          icon: const Icon(Icons.close),
           onPressed: () {
-            Navigator.pop(context);
+            Navigator.pop(context, true);
           },
         ),
         actions: [
           Padding(
             padding: const EdgeInsets.all(8.0),
-            child: IconButton(onPressed: () {}, icon: Icon(Icons.settings)),
+            child:
+                IconButton(onPressed: () {}, icon: const Icon(Icons.settings)),
           )
         ],
         title: Text(
@@ -117,7 +135,7 @@ class _FlashCardPageState extends State<FlashCardPage> {
                   height: 25,
                   alignment: Alignment.center,
                   child: Text(
-                    '$studiedWord',
+                    '$forgotWord',
                     style: const TextStyle(
                         color: Colors.deepOrange, fontWeight: FontWeight.w600),
                   ),
@@ -135,7 +153,7 @@ class _FlashCardPageState extends State<FlashCardPage> {
                   height: 25,
                   alignment: Alignment.center,
                   child: Text(
-                    '$studyingWord',
+                    '$memoriedNum',
                     style: const TextStyle(
                         color: Colors.green, fontWeight: FontWeight.w600),
                   ),
@@ -150,20 +168,23 @@ class _FlashCardPageState extends State<FlashCardPage> {
                 child: SwipeCards(
                   matchEngine: _matchEngine!,
                   likeTag: const Text(
-                    'Đã học',
+                    'Memorized',
                     style: TextStyle(
                         color: Colors.green, fontWeight: FontWeight.w600),
                   ),
                   nopeTag: const Text(
-                    'Đang học',
+                    'Not yet memorized',
                     style: TextStyle(
                         color: Colors.orangeAccent,
                         fontWeight: FontWeight.w600),
                   ),
                   itemBuilder: (BuildContext context, int index) {
-                    return _buildCardWordItem(widget.wordModels[index], index);
+                    return _buildCardWordItem(
+                        widget.wordModels[index], index, widget.isBack);
                   },
-                  onStackFinished: () {
+                  onStackFinished: () async {
+                    print('memoriedWordIdList: $memoriedWordIdList');
+                    await ApiService.learningCount(memoriedWordIdList);
                     ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
                       content: Text("Stack Finished"),
                       duration: Duration(milliseconds: 500),
@@ -197,18 +218,66 @@ class _FlashCardPageState extends State<FlashCardPage> {
               const SizedBox(
                 width: 200,
                 child: Text(
-                  'Vuốt sang phải để đánh dấu Đang Học',
+                  'Click the Play icon to start surfing automatically',
                   textAlign: TextAlign.center,
                 ),
               ),
               const SizedBox(
                 width: 20,
               ),
-              Icon(
-                Icons.play_arrow_rounded,
-                size: 35,
-                color: Colors.grey[600],
-              )
+              isAuto
+                  ? IconButton(
+                      onPressed: () {
+                        timer?.cancel();
+
+                        setState(() {
+                          isAuto = !isAuto;
+                        });
+                      },
+                      icon: const Icon(
+                        Icons.pause,
+                        size: 35,
+                      ))
+                  : IconButton(
+                      onPressed: () {
+                        Future.delayed(const Duration(seconds: 1), () {
+                          if (mounted) {
+                            print('flip $currentItem');
+
+                            _flipCardControllerList[currentItem].toggleCard();
+                          }
+                        });
+
+                        setState(() {
+                          isAuto = !isAuto;
+                        });
+                        timer =
+                            Timer.periodic(const Duration(seconds: 3), (timer) {
+                          if (currentItem < widget.wordModels.length - 1) {
+                            Future.delayed(const Duration(seconds: 1), () {
+                              if (mounted) {
+                                print('flip $currentItem');
+                                _flipCardControllerList[currentItem]
+                                    .toggleCard();
+                              }
+                            });
+                            _matchEngine!.currentItem!.like();
+                            print('currentItem: $currentItem');
+                          } else {
+                            _matchEngine!.currentItem!.like();
+                            timer.cancel();
+                            setState(() {
+                              isAuto = !isAuto;
+                            });
+                          }
+                        });
+                      },
+                      icon: Icon(
+                        Icons.play_arrow_rounded,
+                        size: 35,
+                        color: Colors.grey[600],
+                      ),
+                    )
             ],
           ),
           const SizedBox(
@@ -219,12 +288,15 @@ class _FlashCardPageState extends State<FlashCardPage> {
     );
   }
 
-  Widget _buildCardWordItem(WordModel wordModel, int index) {
+  Widget _buildCardWordItem(WordModel wordModel, int index, [bool? isBack]) {
     return FlipCard(
+      controller: _flipCardControllerList[index],
       // fill: Fill
       //     .fillBack, // Fill the back side of the card to make in the same size as the front.
       direction: FlipDirection.HORIZONTAL, // default
-      side: CardSide.FRONT, // The side to initially display.
+      side: (isBack != null && isBack == true)
+          ? CardSide.BACK
+          : CardSide.FRONT, // The side to initially display.
       front: Container(
         child: _buildCardWord(wordModel.name!, index),
       ),
@@ -239,7 +311,7 @@ class _FlashCardPageState extends State<FlashCardPage> {
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(15.0),
             border: (showBorder && index == currentItem)
-                ? Border.all(color: Colors.red, width: 1)
+                ? Border.all(color: boderColor, width: 1)
                 : null,
           ),
           alignment: Alignment.center,

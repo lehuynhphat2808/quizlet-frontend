@@ -1,17 +1,22 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:csv/csv.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:quizlet_frontend/services/api_service.dart';
 import 'package:quizlet_frontend/topic/topic_cubit/topic_bloc.dart';
 import 'package:quizlet_frontend/topic/topic_model.dart';
+import 'package:quizlet_frontend/utilities/pick_upload_image.dart';
 import 'package:quizlet_frontend/utilities/router_manager.dart';
 import 'package:quizlet_frontend/word/bloc/word_bloc.dart';
 import 'package:quizlet_frontend/word/word_model.dart';
+import 'package:translator/translator.dart';
 
 import '../topic/topic_list_bloc/topic_list_bloc.dart';
 import '../topic/topic_list_bloc/topic_list_event.dart';
@@ -38,6 +43,9 @@ class _AddTopicPageState extends State<AddPage> {
   late TopicListBloc topicBloc;
   bool public = false;
   String? dropDownValue = 'Private';
+  PlatformFile? image;
+  String? url;
+  final translator = GoogleTranslator();
 
   @override
   void initState() {
@@ -113,15 +121,16 @@ class _AddTopicPageState extends State<AddPage> {
                 },
                 icon: const Icon(FontAwesomeIcons.fileCsv)),
           IconButton(
-              onPressed: () {
-                if (_formKey.currentState!.validate()) {
-                  _formKey.currentState!.save();
-                }
-              },
-              icon: const Icon(
-                Icons.done,
-                size: 32,
-              )),
+            onPressed: () async {
+              if (_formKey.currentState!.validate()) {
+                _formKey.currentState!.save();
+              }
+            },
+            icon: const Icon(
+              Icons.done,
+              size: 32,
+            ),
+          ),
         ],
       ),
       body: Form(
@@ -143,14 +152,23 @@ class _AddTopicPageState extends State<AddPage> {
                   }
                   return null;
                 },
-                onSaved: (newValue) {
+                onSaved: (newValue) async {
                   if (widget.topicModel == null) {
-                    context.read<TopicListBloc>().add(
-                          TopicInsertedEvent(
-                            topicInfo:
-                                TopicModel(name: newValue, public: public),
-                          ),
-                        );
+                    if (image != null) {
+                      url = await ApiService.uploadImage(
+                          image!.extension!, image!.bytes!);
+                    }
+                    if (context.mounted) {
+                      context.read<TopicListBloc>().add(
+                            TopicInsertedEvent(
+                              topicInfo: TopicModel(
+                                  name: newValue,
+                                  public: public,
+                                  url: url ??
+                                      'https://uni-quizlet.s3.ap-southeast-1.amazonaws.com/bf244890818d4c7da00f9de6684893821715178882.jpg'),
+                            ),
+                          );
+                    }
                   } else {
                     newTopic.id = widget.topicModel!.id;
                     newTopic.name = newValue;
@@ -159,11 +177,18 @@ class _AddTopicPageState extends State<AddPage> {
                     }
                     newTopic.words = wordModelList;
                     newTopic.public = public;
-                    context
-                        .read<TopicCubit>()
-                        .updateTopic(widget.topicModel!, newTopic);
-                    Navigator.popUntil(
-                        context, ModalRoute.withName(Routes.topicPage));
+                    if (image != null) {
+                      url = await ApiService.uploadImage(
+                          image!.extension!, image!.bytes!);
+                      newTopic.url = url!;
+                    }
+                    if (context.mounted) {
+                      context
+                          .read<TopicCubit>()
+                          .updateTopic(widget.topicModel!, newTopic);
+                      Navigator.popUntil(
+                          context, ModalRoute.withName(Routes.topicPage));
+                    }
                   }
                 },
               ),
@@ -175,18 +200,18 @@ class _AddTopicPageState extends State<AddPage> {
                 style: TextStyle(fontSize: 8, fontWeight: FontWeight.bold),
               ),
               Container(
-                padding: EdgeInsets.symmetric(horizontal: 16),
-                height: 100,
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                height: 50,
                 width: double.maxFinite,
                 child: DropdownButtonFormField(
                   value: dropDownValue, // this
                   items: ["Private", "Public"]
-                      .map<DropdownMenuItem<String>>((String _value) =>
+                      .map<DropdownMenuItem<String>>((String value) =>
                           DropdownMenuItem<String>(
                               value:
-                                  _value, // add this property an pass the _value to it
+                                  value, // add this property an pass the _value to it
                               child: Text(
-                                _value,
+                                value,
                               )))
                       .toList(),
                   onChanged: (value) {
@@ -199,9 +224,62 @@ class _AddTopicPageState extends State<AddPage> {
                   },
                 ),
               ),
-              const SizedBox(
-                height: 20,
+              MyImagePicker(
+                getImage: getImage,
+                topicModel: widget.topicModel,
               ),
+              // Center(
+              //   child: GestureDetector(
+              //     onTap: () async {
+              //       var result = await pickImage();
+              //       if (result != null) {
+              //         setState(() {
+              //           image = result.files.first;
+              //         });
+              //       }
+              //     },
+              //     child: Container(
+              //       decoration: BoxDecoration(
+              //           border: Border.all(width: 1),
+              //           borderRadius: BorderRadius.circular(15)),
+              //       height: 200,
+              //       margin:
+              //           const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              //       padding: const EdgeInsets.all(1),
+              //       child: image == null
+              //           ? widget.topicModel != null
+              //               ? ClipRRect(
+              //                   borderRadius: BorderRadius.circular(15),
+              //                   child: FadeInImage(
+              //                     fit: BoxFit.cover,
+              //                     image: NetworkImage(
+              //                       widget.topicModel!.url,
+              //                     ),
+              //                     placeholder: const AssetImage(
+              //                         'assets/images/topic.png'),
+              //                     imageErrorBuilder:
+              //                         (context, error, stackTrace) {
+              //                       return Image.asset(
+              //                           'assets/images/topic.png');
+              //                     },
+              //                   ),
+              //                 )
+              //               : const Center(
+              //                   child: Icon(Icons.add_photo_alternate_outlined))
+              //           : Container(
+              //               decoration: BoxDecoration(
+              //                 border: Border.all(color: Colors.transparent),
+              //                 borderRadius: BorderRadius.circular(15),
+              //                 image: DecorationImage(
+              //                     image: MemoryImage(
+              //                       image!.bytes!,
+              //                     ),
+              //                     fit: BoxFit.cover),
+              //               ),
+              //             ),
+              //     ),
+              //   ),
+              // ),
               Expanded(
                 child: ListView.builder(
                     shrinkWrap: false,
@@ -210,9 +288,7 @@ class _AddTopicPageState extends State<AddPage> {
                       return Dismissible(
                           direction: DismissDirection.endToStart,
                           onDismissed: (direction) {
-                            setState(() {
-                              wordModelList.removeAt(index);
-                            });
+                            wordModelList.removeAt(index);
                           },
                           confirmDismiss: (direction) async {
                             return await showDialog(
@@ -267,7 +343,17 @@ class _AddTopicPageState extends State<AddPage> {
     );
   }
 
+  void getImage(PlatformFile? image) {
+    this.image = image;
+  }
+
   Widget _buildItemWord(int index) {
+    TextEditingController defController =
+        TextEditingController(text: wordModelList[index].definition);
+    TextEditingController wordController =
+        TextEditingController(text: wordModelList[index].name);
+    print('controller: $defController');
+
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 10),
       decoration: BoxDecoration(
@@ -277,7 +363,14 @@ class _AddTopicPageState extends State<AddPage> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           TextFormField(
-            initialValue: wordModelList[index].name,
+            controller: wordController,
+            onChanged: (value) async {
+              var defTran = await translator.translate(value,
+                  to: (ApiService.userModel.languageCode ?? 'vi')
+                      .toLowerCase());
+
+              defController.text = defTran.text;
+            },
             decoration: const InputDecoration.collapsed(
               hintText: 'Word',
               border: UnderlineInputBorder(),
@@ -300,7 +393,11 @@ class _AddTopicPageState extends State<AddPage> {
             style: TextStyle(fontSize: 8, fontWeight: FontWeight.bold),
           ),
           TextFormField(
-            initialValue: wordModelList[index].definition,
+            controller: defController,
+            onTap: () {
+              defController.selection = TextSelection(
+                  baseOffset: 0, extentOffset: defController.value.text.length);
+            },
             decoration: const InputDecoration.collapsed(
               hintText: 'Definition',
               border: UnderlineInputBorder(),
@@ -331,10 +428,14 @@ class _AddTopicPageState extends State<AddPage> {
     setState(() {
       wordModelList.clear();
     });
-    final result = await FilePicker.platform.pickFiles(allowMultiple: false);
+    final result = await FilePicker.platform.pickFiles(
+      allowMultiple: false,
+      type: FileType.custom,
+      allowedExtensions: ['csv'],
+    );
 
     // if no file is picked
-    if (result == null) return;
+    if (result == null || !result.files.first.name.endsWith('.csv')) return;
     // we will log the name, size and path of the
     // first picked file (if multiple are selected)
     print(result.files.first.name);
@@ -361,5 +462,71 @@ class _AddTopicPageState extends State<AddPage> {
         print('wordModelList: ${wordModelList[i - 1].name}');
       }
     }
+  }
+}
+
+class MyImagePicker extends StatefulWidget {
+  final Function? getImage;
+  final TopicModel? topicModel;
+  const MyImagePicker({super.key, this.topicModel, this.getImage});
+
+  @override
+  State<MyImagePicker> createState() => _MyImagePickerState();
+}
+
+class _MyImagePickerState extends State<MyImagePicker> {
+  PlatformFile? image;
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: GestureDetector(
+        onTap: () async {
+          var result = await pickImage();
+          if (result != null) {
+            setState(() {
+              image = result.files.first;
+            });
+            widget.getImage!(image);
+          }
+        },
+        child: Container(
+          decoration: BoxDecoration(
+              border: Border.all(width: 1),
+              borderRadius: BorderRadius.circular(15)),
+          height: 200,
+          margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          padding: const EdgeInsets.all(1),
+          child: image == null
+              ? widget.topicModel != null
+                  ? ClipRRect(
+                      borderRadius: BorderRadius.circular(15),
+                      child: FadeInImage(
+                        fit: BoxFit.cover,
+                        image: NetworkImage(
+                          widget.topicModel!.url,
+                        ),
+                        placeholder:
+                            const AssetImage('assets/images/topic.png'),
+                        imageErrorBuilder: (context, error, stackTrace) {
+                          return Image.asset('assets/images/topic.png');
+                        },
+                      ),
+                    )
+                  : const Center(
+                      child: Icon(Icons.add_photo_alternate_outlined))
+              : Container(
+                  decoration: BoxDecoration(
+                    border: Border.all(color: Colors.transparent),
+                    borderRadius: BorderRadius.circular(15),
+                    image: DecorationImage(
+                        image: MemoryImage(
+                          image!.bytes!,
+                        ),
+                        fit: BoxFit.cover),
+                  ),
+                ),
+        ),
+      ),
+    );
   }
 }

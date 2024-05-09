@@ -2,14 +2,13 @@ import 'dart:async';
 import 'dart:math';
 
 import 'package:animate_do/animate_do.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:quizlet_frontend/services/api_service.dart';
+import 'package:quizlet_frontend/utilities/list_util.dart';
 
 import '../word/word_model.dart';
 
-int _timeRemaining = 60; // 60 giây
+int _timeRemaining = 100; // 60 giây
 
 class CardPairingGame extends StatefulWidget {
   final List<WordModel> wordList;
@@ -27,7 +26,7 @@ class _CardPairingGameState extends State<CardPairingGame> {
       cardTextList.add({wordModel.name!: wordModel.definition!});
       cardTextList.add({wordModel.definition!: wordModel.name!});
     }
-    _shuffle(cardTextList);
+    shuffle(cardTextList);
     return Scaffold(
       appBar: AppBar(
         title: Text(
@@ -35,6 +34,7 @@ class _CardPairingGameState extends State<CardPairingGame> {
           style: TextStyle(
               fontSize: 20,
               fontWeight: FontWeight.w600,
+              fontFamily: 'Pacifico',
               color: Colors.grey[800]),
         ),
         leading: IconButton(
@@ -59,26 +59,20 @@ class _CardPairingGameState extends State<CardPairingGame> {
       ),
       body: MyBody(
         cardTextList: cardTextList,
-        topicId: widget.wordList[0].topicId!,
+        // topicId: widget.wordList[0].topicId!,
       ),
     );
-  }
-
-  void _shuffle(List array) {
-    for (var i = array.length - 1; i > 0; i--) {
-      var j = Random().nextInt(i + 1);
-      var temp = array[i];
-      array[i] = array[j];
-      array[j] = temp;
-    }
   }
 }
 
 class MyGridView extends StatefulWidget {
-  final String topicId;
+  // final String topicId;
   final List<Map<String, String>> cardTextList;
-  const MyGridView(
-      {super.key, required this.cardTextList, required this.topicId});
+  const MyGridView({
+    super.key,
+    required this.cardTextList,
+    // required this.topicId
+  });
 
   @override
   State<MyGridView> createState() => _MyGridViewState();
@@ -107,9 +101,11 @@ class _MyGridViewState extends State<MyGridView> {
       cardTextList.length,
       (index) => GestureDetector(
         onTap: () {
-          setState(() {
-            tappedList[index] = true;
-          });
+          if (mounted) {
+            setState(() {
+              tappedList[index] = true;
+            });
+          }
           if (pickedWord.isEmpty) {
             pickedWord = cardTextList[index];
             pickedWord.addAll({'index': '$index'});
@@ -117,21 +113,24 @@ class _MyGridViewState extends State<MyGridView> {
           } else {
             if (pickedWord.keys.first == cardTextList[index].values.first) {
               int lastIndex = int.parse(pickedWord['index']!);
-              setState(() {
-                fadedList[index] = true;
-                fadedList[lastIndex] = true;
-                ApiService.addScore(widget.topicId, _timeRemaining);
-                if (fadedList.every((element) => element)) {
-                  Navigator.pop(context);
-                }
-                pickedWord = {};
-              });
+              if (mounted) {
+                setState(() {
+                  fadedList[index] = true;
+                  fadedList[lastIndex] = true;
+                  if (fadedList.every((element) => element)) {
+                    Navigator.pop(context, _timeRemaining);
+                  }
+                  pickedWord = {};
+                });
+              }
             } else {
               print('pppppppppppppppppppppppppppppppp');
               pickedWord = {};
-              setState(() {
-                tappedList = List.filled(widget.cardTextList.length, false);
-              });
+              if (mounted) {
+                setState(() {
+                  tappedList = List.filled(widget.cardTextList.length, false);
+                });
+              }
             }
           }
         },
@@ -182,22 +181,62 @@ class _FadeCardState extends State<FadeCard> {
 }
 
 class MyBody extends StatefulWidget {
-  final String topicId;
+  // final String topicId;
 
   final List<Map<String, String>> cardTextList;
-  const MyBody({super.key, required this.cardTextList, required this.topicId});
+  const MyBody({
+    super.key,
+    required this.cardTextList,
+    // required this.topicId
+  });
 
   @override
   State<MyBody> createState() => _MyBodyState();
 }
 
 class _MyBodyState extends State<MyBody> {
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        const MyProgress(),
+        Expanded(
+          child: MyGridView(
+            cardTextList: widget.cardTextList,
+            // topicId: widget.topicId,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class MyProgress extends StatefulWidget {
+  const MyProgress({super.key});
+
+  @override
+  State<MyProgress> createState() => _MyProgressState();
+}
+
+class _MyProgressState extends State<MyProgress> {
   late Timer timer;
 
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
+    _timeRemaining = 100;
     _startTimer();
   }
 
@@ -211,14 +250,26 @@ class _MyBodyState extends State<MyBody> {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        Row(
-          children: [Text('Your score: $_timeRemaining')],
-        ),
-        Expanded(
-          child: MyGridView(
-            cardTextList: widget.cardTextList,
-            topicId: widget.topicId,
-          ),
+        Stack(
+          children: [
+            SizedBox(
+              height: 16,
+              width: MediaQuery.of(context).size.width,
+              child: LinearProgressIndicator(
+                color: Colors.blue,
+                value: _timeRemaining / 100,
+              ),
+            ),
+            Container(
+                alignment: Alignment.topCenter,
+                child: Text(
+                  '$_timeRemaining',
+                  style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold),
+                )),
+          ],
         ),
       ],
     );
@@ -226,13 +277,16 @@ class _MyBodyState extends State<MyBody> {
 
   void _startTimer() {
     timer = Timer.periodic(const Duration(seconds: 1), (timer) {
-      setState(() {
-        if (_timeRemaining < 1) {
-          timer.cancel();
-        } else {
-          _timeRemaining--;
-        }
-      });
+      if (mounted) {
+        setState(() {
+          if (_timeRemaining < 1) {
+            timer.cancel();
+            Navigator.pop(context);
+          } else {
+            _timeRemaining--;
+          }
+        });
+      }
       print(_timeRemaining);
     });
   }

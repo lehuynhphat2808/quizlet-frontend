@@ -250,10 +250,19 @@ class _TopicListState extends State<TopicList> {
                 height: 100,
                 width: 100,
                 margin: const EdgeInsets.only(right: 10),
-                decoration: const BoxDecoration(
-                    image: DecorationImage(
-                        fit: BoxFit.cover,
-                        image: AssetImage('assets/images/topic.png'))),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(8),
+                  child: FadeInImage(
+                    fit: BoxFit.cover,
+                    image: NetworkImage(
+                      topicModel.url,
+                    ),
+                    placeholder: const AssetImage('assets/images/topic.png'),
+                    imageErrorBuilder: (context, error, stackTrace) {
+                      return Image.asset('assets/images/topic.png');
+                    },
+                  ),
+                ),
               ),
             ],
           ),

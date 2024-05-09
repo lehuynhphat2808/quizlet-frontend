@@ -19,7 +19,11 @@ class _LeadingBoardPageState extends State<LeadingBoardPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Leading Board'),
+        elevation: 4,
+        title: const Text(
+          'Leading Board',
+          style: TextStyle(fontFamily: 'Pacifico'),
+        ),
         centerTitle: true,
       ),
       body: FutureBuilder<LeadingBoardModel>(
@@ -79,7 +83,7 @@ class _MyBoardState extends State<MyBoard> {
       child: ListView.builder(
         itemBuilder: (context, index) {
           return Container(
-            margin: EdgeInsets.all(8),
+            margin: const EdgeInsets.all(8),
             decoration: BoxDecoration(
                 border: Border.all(color: Colors.white),
                 borderRadius: BorderRadius.circular(12)),
@@ -109,6 +113,7 @@ class _MyBoardState extends State<MyBoard> {
                           height: 50,
                           width: 50,
                           child: FadeInImage(
+                              fit: BoxFit.cover,
                               placeholder: const AssetImage(
                                   'assets/images/default_profile.png'),
                               image: NetworkImage(
