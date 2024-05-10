@@ -11,7 +11,9 @@ import 'package:quizlet_frontend/user/user_settingPage.dart';
 import 'package:animated_bottom_navigation_bar/animated_bottom_navigation_bar.dart';
 import 'package:quizlet_frontend/utilities/router_manager.dart';
 
+import '../services/api_service.dart';
 import '../topic/topic_list_page.dart';
+import '../word/word_model.dart';
 // import 'package:flutter_svg/flutter_svg.dart';
 
 class MainPage extends StatefulWidget {
@@ -65,15 +67,7 @@ class _MainPageState extends State<MainPage> {
 
   final List<PreferredSizeWidget?> appBarList = [
     null,
-    AppBar(
-      title: const Text(
-        "Topic",
-        style: TextStyle(fontWeight: FontWeight.bold, fontFamily: 'Pacifico'),
-      ),
-      centerTitle: true,
-      elevation: 4,
-      shadowColor: Colors.grey,
-    ),
+    null,
     AppBar(
       title: const Text(
         "Folder",

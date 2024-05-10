@@ -21,7 +21,8 @@ class ApiService {
   static Map<String, String> get headers => {
         "Content-Type": "application/json",
         "Accept": "application/json",
-        "Authorization": "Bearer ${Auth0Service.credentials!.accessToken}",
+        "Authorization":
+            "Bearer ${kIsWeb ? Auth0Service.credentials!.accessToken : Auth0Service.credentials!.accessToken}",
       };
 
   static dynamic decodeData(Uint8List data) {
@@ -205,12 +206,15 @@ class ApiService {
   }
 
   static Future<void> getProfile() async {
+    print('getProfile: ');
+
     var res =
         await http.get(Uri.parse('${baseUrl}users/profile'), headers: headers);
     if (res.statusCode == 200) {
       Map<String, dynamic> response = decodeData(res.bodyBytes);
       print(response);
       userModel = UserModel.fromJson(response);
+      print('userModel: ${userModel.toJson()}');
     } else {
       throw Exception("getTopic fail ${res.statusCode}");
     }

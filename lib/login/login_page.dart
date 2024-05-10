@@ -1,5 +1,8 @@
 import 'package:animate_do/animate_do.dart';
 import 'package:auth0_flutter/auth0_flutter.dart';
+import 'package:auth0_flutter/auth0_flutter_web.dart';
+import 'package:flutter/foundation.dart';
+
 import 'package:flutter/material.dart';
 import 'package:quizlet_frontend/services/api_service.dart';
 import 'package:quizlet_frontend/services/auth0_service.dart';
@@ -18,26 +21,58 @@ class _LoginPageState extends State<LoginPage> {
   @override
   void initState() {
     print('initState');
+    if (kIsWeb) {
+      var auth0 = Auth0Service.getAutho0();
 
-    super.initState();
-    Future.microtask(() async {
-      Auth0 auth0 = Auth0Service.getAutho0();
-      print('init auth0');
-      if (await auth0.credentialsManager.hasValidCredentials()) {
-        Auth0Service.credentials = await auth0.credentialsManager.credentials();
-        print(
-            'Auth0Service.credentials: ${Auth0Service.credentials!.user.sub}');
-        print('token: ${Auth0Service.credentials!.accessToken}');
-        await ApiService.getProfile();
-        if (mounted) {
-          Navigator.pushNamedAndRemoveUntil(
-            context,
-            Routes.mainPage,
-            (route) => false,
+      auth0 = auth0 as Auth0Web;
+      print('auth0: ${auth0}');
+      auth0
+          .onLoad(
+            audience: "http://localhost:8080",
+          )
+          .then(
+            (credentials) => setState(
+              () {
+                print("credentials not empty ${credentials != null}");
+
+                if (credentials != null) {
+                  // authService.writeUserCredentialsToCache(credentials);
+                  // context.go("/");
+                  print('credentials: ${credentials.toMap()}');
+                }
+              },
+            ),
           );
+    }
+
+    Future.microtask(() async {
+      if (kIsWeb) {
+        // var auth0 = Auth0Service.getAutho0();
+        // Credentials? creds =
+        //     await auth0.credentials(audience: "http://localhost:8080");
+        // print('creds: ${creds?.toMap()}');
+      } else {
+        var auth0 = Auth0Service.getAutho0();
+        print('init auth0');
+        auth0 = auth0 as Auth0;
+        if (await auth0.credentialsManager.hasValidCredentials()) {
+          Auth0Service.credentials =
+              await auth0.credentialsManager.credentials();
+          print(
+              'Auth0Service.credentials: ${Auth0Service.credentials!.user.sub}');
+          print('token: ${Auth0Service.credentials!.accessToken}');
+          await ApiService.getProfile();
+          if (mounted) {
+            Navigator.pushNamedAndRemoveUntil(
+              context,
+              Routes.mainPage,
+              (route) => false,
+            );
+          }
         }
       }
     });
+    super.initState();
   }
 
   @override
@@ -129,13 +164,61 @@ class _LoginPageState extends State<LoginPage> {
                           child: InkWell(
                             onTap: () async {
                               print('click login');
+                              if (kIsWeb) {
+                                var auth0Web = Auth0Service.getAutho0();
+                                // await auth0Web
+                                //     .onLoad(audience: "http://localhost:8080")
+                                //     .then((final credentials) => setState(() {
+                                //           Auth0Service.credentials =
+                                //               credentials;
+                                //         }));
+                                // Set<String> scopes = {
+                                //   'openid',
+                                //   'profile',
+                                //   'email',
+                                // };
+                                //
+                                // auth0Web.loginWithRedirect(
+                                //   redirectUrl: 'http://localhost:3000',
+                                //
+                                //   audience: 'http://localhost:8080',
+                                //   scopes: scopes,
+                                //
+                                //   // scopes: {'offline_access'},
+                                // );
+                                auth0Web
+                                    .onLoad(
+                                      audience: "http://localhost:8080",
+                                    )
+                                    .then(
+                                      (credentials) => setState(
+                                        () {
+                                          print(
+                                              "credentials not empty0 ${credentials != null}");
 
-                              await Auth0Service.login();
-                              await ApiService.getProfile();
-                              print(
-                                  'profile: ${ApiService.userModel.toJson()}');
-                              Navigator.pushReplacementNamed(
-                                  context, Routes.mainPage);
+                                          if (credentials != null) {
+                                            // authService.writeUserCredentialsToCache(credentials);
+                                            // context.go("/");
+                                            print(
+                                                'credentials2: ${credentials.toMap()}');
+                                          }
+                                        },
+                                      ),
+                                    );
+                              } else {
+                                await Auth0Service.login();
+                                print('click login1');
+
+                                await ApiService.getProfile();
+                                print('click login2');
+
+                                print(
+                                    'profile: ${ApiService.userModel.toJson()}');
+                                if (context.mounted) {
+                                  Navigator.pushReplacementNamed(
+                                      context, Routes.mainPage);
+                                }
+                              }
                             },
                             child: Container(
                               height: 50,

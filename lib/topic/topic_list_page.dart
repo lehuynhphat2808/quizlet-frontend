@@ -27,97 +27,33 @@ class _TopicListPageState extends State<TopicListPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        FutureBuilder(
-          future: ApiService.getWordMarked(),
-          builder:
-              (BuildContext context, AsyncSnapshot<List<WordModel>> snapshot) {
-            if (snapshot.hasData) {
-              List<WordModel> wordModelList = snapshot.data!;
-              return GestureDetector(
-                onTap: () {
-                  print('xxxxxxxxxxxxxxxxxxxxxxxxxxxxx');
-                  Navigator.pushNamed(context, Routes.wordMarkedPage,
-                      arguments: TopicModel(
-                          name: 'My Favorite Words',
-                          words: wordModelList,
-                          owner: ApiService.userModel));
-                },
-                child: Card(
-                  elevation: 0,
-                  color: Colors.transparent,
-                  child: Container(
-                    decoration: BoxDecoration(
-                        border: Border.all(color: Colors.green),
-                        borderRadius: BorderRadius.circular(15)),
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              ListTile(
-                                title: const Text(
-                                  'My Favorite Word',
-                                  style: TextStyle(fontWeight: FontWeight.bold),
-                                ),
-                                subtitle: Text('${wordModelList.length} words'),
-                              ),
-                              Padding(
-                                padding:
-                                    const EdgeInsets.only(left: 15, bottom: 10),
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.start,
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    CircleAvatar(
-                                      radius: 15,
-                                      backgroundImage: NetworkImage(
-                                          ApiService.userModel.avatar),
-                                    ),
-                                    const SizedBox(
-                                      width: 10,
-                                    ),
-                                    Text(
-                                      ApiService.userModel.nickname,
-                                      style: const TextStyle(
-                                          fontWeight: FontWeight.bold),
-                                    )
-                                  ],
-                                ),
-                              )
-                            ],
-                          ),
-                        ),
-                        Container(
-                          height: 100,
-                          width: 100,
-                          margin: const EdgeInsets.only(right: 10),
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(8),
-                            child: Image.asset('assets/images/star_icon.png'),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              );
-            } else if (snapshot.hasError) {
-              return Text('${snapshot.error}');
-            } else {
-              return Center(
-                  child: LoadingAnimationWidget.discreteCircle(
-                      color: Colors.grey[300]!, size: 40));
-            }
-          },
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text(
+          "Topic",
+          style: TextStyle(fontWeight: FontWeight.bold, fontFamily: 'Pacifico'),
         ),
-        const SizedBox(
-          height: 8,
-        ),
-        Expanded(child: _buildListTopic),
-      ],
+        centerTitle: true,
+        elevation: 4,
+        shadowColor: Colors.grey,
+        actions: [
+          IconButton(
+              onPressed: () async {
+                List<WordModel> wordModelList =
+                    await ApiService.getWordMarked();
+                Navigator.pushNamed(context, Routes.wordMarkedPage,
+                    arguments: TopicModel(
+                        name: 'My Favorite Words',
+                        words: wordModelList,
+                        owner: ApiService.userModel));
+              },
+              icon: const ImageIcon(
+                AssetImage('assets/images/star_icon.png'),
+                color: Colors.orange,
+              ))
+        ],
+      ),
+      body: _buildListTopic,
     );
   }
 
