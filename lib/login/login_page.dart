@@ -28,8 +28,8 @@ class _LoginPageState extends State<LoginPage> {
       print('auth0: ${auth0}');
       auth0
           .onLoad(
-            audience: "http://localhost:8080",
-          )
+              // audience: "http://localhost:8080",
+              )
           .then(
             (credentials) => setState(
               () {
@@ -178,33 +178,32 @@ class _LoginPageState extends State<LoginPage> {
                                 //   'email',
                                 // };
                                 //
-                                // auth0Web.loginWithRedirect(
-                                //   redirectUrl: 'http://localhost:3000',
-                                //
-                                //   audience: 'http://localhost:8080',
-                                //   scopes: scopes,
-                                //
-                                //   // scopes: {'offline_access'},
-                                // );
-                                auth0Web
-                                    .onLoad(
-                                      audience: "http://localhost:8080",
-                                    )
-                                    .then(
-                                      (credentials) => setState(
-                                        () {
-                                          print(
-                                              "credentials not empty0 ${credentials != null}");
+                                auth0Web.loginWithRedirect(
+                                  redirectUrl: 'http://localhost:3000',
 
-                                          if (credentials != null) {
-                                            // authService.writeUserCredentialsToCache(credentials);
-                                            // context.go("/");
-                                            print(
-                                                'credentials2: ${credentials.toMap()}');
-                                          }
-                                        },
-                                      ),
-                                    );
+                                  // audience: 'http://localhost:8080',
+
+                                  // scopes: {'offline_access'},
+                                );
+                                // auth0Web
+                                //     .onLoad(
+                                //       audience: "http://localhost:8080",
+                                //     )
+                                //     .then(
+                                //       (credentials) => setState(
+                                //         () {
+                                //           print(
+                                //               "credentials not empty0 ${credentials != null}");
+                                //
+                                //           if (credentials != null) {
+                                //             // authService.writeUserCredentialsToCache(credentials);
+                                //             // context.go("/");
+                                //             print(
+                                //                 'credentials2: ${credentials.toMap()}');
+                                //           }
+                                //         },
+                                //       ),
+                                //     );
                               } else {
                                 await Auth0Service.login();
                                 print('click login1');
