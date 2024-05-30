@@ -1,16 +1,7 @@
-# quizlet_frontend
-
-A new Flutter project.
-
-## Getting Started
-
-This project is a starting point for a Flutter application.
-
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+# Hướng Dẫn Cài Đặt Ứng Dụng
+- Bước 1: mở terminal vào thư mục project hiện tại
+- Bước 2: cd docker
+- Bước 3: Mở docker desktop
+- Bước 4: Chạy lệnh sh .\pull.sh
+- Bước 5: Chạy lệnh sh .\run.sh
+- Bước 6: Chạy file main.dart trong ứng dụng
